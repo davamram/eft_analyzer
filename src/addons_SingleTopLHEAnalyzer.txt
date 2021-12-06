@@ -1,0 +1,197 @@
+/*
+         weight_SM_size=Rwgt_Weight[0];
+
+         weight_ctwi_p1_size=Rwgt_Weight[1];
+
+         weight_ctwi_m1_size=Rwgt_Weight[2];
+
+         weight_ctwi_p2_size=Rwgt_Weight[3];
+
+         weight_ctwi_m2_size=Rwgt_Weight[4];
+
+         weight_cbwi_p1_size=Rwgt_Weight[5];
+
+         weight_cbwi_m1_size=Rwgt_Weight[6];
+
+         weight_cbwi_p2_size=Rwgt_Weight[7];
+
+         weight_cbwi_m2_size=Rwgt_Weight[8];
+
+    weight_SM_size+=Rwgt_Weight[0];
+    weight_ctwi_p1_size+=Rwgt_Weight[1];
+    weight_ctwi_m1_size+=Rwgt_Weight[2];
+    weight_ctwi_p2_size+=Rwgt_Weight[3];
+    weight_ctwi_m2_size+=Rwgt_Weight[4];
+    weight_cbwi_p1_size+=Rwgt_Weight[5];
+    weight_cbwi_m1_size+=Rwgt_Weight[6];
+    weight_cbwi_p2_size+=Rwgt_Weight[7];
+    weight_cbwi_m2_size+=Rwgt_Weight[8];
+
+
+   cout<<"weight_SM_size= "<<weight_SM_size<<endl;
+   cout<<"weight_ctwi_p1_size= "<<weight_ctwi_p1_size<<endl;
+   cout<<"weight_ctwi_p2_size= "<<weight_ctwi_p2_size<<endl;
+   cout<<"weight_ctwi_m1_size= "<<weight_ctwi_m1_size<<endl;
+   cout<<"weight_ctwi_m2_size= "<<weight_ctwi_m2_size<<endl;
+   cout<<"weight_cbwi_p1_size= "<<weight_cbwi_p1_size<<endl;
+   cout<<"weight_cbwi_p2_size= "<<weight_cbwi_p2_size<<endl;
+   cout<<"weight_cbwi_m1_size= "<<weight_cbwi_m1_size<<endl;
+   cout<<"weight_cbwi_m2_size= "<<weight_cbwi_m2_size<<endl;
+
+
+
+  cout<<"weight_SM_size= "<<Rwgt_Weight[0]<<endl;
+  cout<<"weight_ctwi_p1_size= "<<Rwgt_Weight[1]<<endl;
+  cout<<"weight_ctwi_p2_size= "<<Rwgt_Weight[2]<<endl;
+  cout<<"weight_ctwi_m1_size= "<<Rwgt_Weight[3]<<endl;
+  cout<<"weight_ctwi_m2_size= "<<Rwgt_Weight[4]<<endl;
+  cout<<"weight_cbwi_p1_size= "<<Rwgt_Weight[5]<<endl;
+  cout<<"weight_cbwi_p2_size= "<<Rwgt_Weight[6]<<endl;
+  cout<<"weight_cbwi_m1_size= "<<Rwgt_Weight[7]<<endl;
+  cout<<"weight_cbwi_m2_size= "<<Rwgt_Weight[8]<<endl;
+
+      cout<<"weight_sum0= "<<weight_sum[0]<<endl;
+      cout<<"weight_sum1= "<<weight_sum[1]<<endl;
+      cout<<"weight_sum2= "<<weight_sum[2]<<endl;
+      cout<<"weight_sum3= "<<weight_sum[3]<<endl;
+      cout<<"weight_sum4= "<<weight_sum[4]<<endl;
+      cout<<"weight_sum5= "<<weight_sum[5]<<endl;
+      cout<<"weight_sum6= "<<weight_sum[6]<<endl;
+      cout<<"weight_sum7= "<<weight_sum[7]<<endl;
+      cout<<"weight_sum8= "<<weight_sum[8]<<endl;
+
+
+
+
+      weight_sum[0]+=Rwgt_Weight[0];
+      weight_sum[1]+=Rwgt_Weight[1];
+      weight_sum[2]+=Rwgt_Weight[2];
+      weight_sum[3]+=Rwgt_Weight[3];
+      weight_sum[4]+=Rwgt_Weight[4];
+      weight_sum[5]+=Rwgt_Weight[5];
+      weight_sum[6]+=Rwgt_Weight[6];
+      weight_sum[7]+=Rwgt_Weight[7];
+      weight_sum[8]+=Rwgt_Weight[8];
+
+    weight_SM_size=Rwgt_Weight[0];
+    weight_ctwi_p1_size=Rwgt_Weight[1];
+    weight_ctwi_m1_size=Rwgt_Weight[2];
+    weight_ctwi_p2_size=Rwgt_Weight[3];
+    weight_ctwi_m2_size=Rwgt_Weight[4];
+    weight_cbwi_p1_size=Rwgt_Weight[5];
+    weight_cbwi_m1_size=Rwgt_Weight[6];
+    weight_cbwi_p2_size=Rwgt_Weight[7];
+    weight_cbwi_m2_size=Rwgt_Weight[8];
+
+    weight_SM_size = 0;
+    weight_ctwi_p1_size = 0;
+    weight_ctwi_m1_size = 0;
+    weight_ctwi_p2_size = 0;
+    weight_ctwi_m2_size = 0;
+    weight_cbwi_p1_size = 0;
+    weight_cbwi_m1_size = 0;
+    weight_cbwi_p2_size = 0;
+    weight_cbwi_m2_size = 0;
+
+
+
+
+*/
+
+    
+   float weight_ctwi_m5, weight_ctwi_m2, weight_ctwi_m1, weight_ctwi_p1, weight_ctwi_p2, weight_ctwi_p5;
+   float weight_cbwi_m5, weight_cbwi_m2, weight_cbwi_m1, weight_cbwi_p1, weight_cbwi_p2, weight_cbwi_p5;
+   double weight_sum[9];
+    
+   
+   
+   double weight_SM_size;
+   double weight_ctwi_m5_size, weight_ctwi_m2_size, weight_ctwi_m1_size, weight_ctwi_p1_size, weight_ctwi_p2_size, weight_ctwi_p5_size;
+   double weight_cbwi_m5_size, weight_cbwi_m2_size, weight_cbwi_m1_size, weight_cbwi_p1_size, weight_cbwi_p2_size, weight_cbwi_p5_size;
+
+
+  if(Rwgt_>0)
+  {
+   
+   cout<<"Rwgt_ > 0"<<endl;
+   tOutput->Branch("weight_SM",&weight_SM,"weight_SM/F");
+
+   tOutput->Branch("weight_ctwi_m2",&weight_ctwi_m2,"weight_ctwi_m2/F");
+   tOutput->Branch("weight_ctwi_m1",&weight_ctwi_m1,"weight_ctwi_m1/F");
+   tOutput->Branch("weight_ctwi_p1",&weight_ctwi_p1,"weight_ctwi_p1/F");
+   tOutput->Branch("weight_ctwi_p2",&weight_ctwi_p2,"weight_ctwi_p2/F");
+
+   tOutput->Branch("weight_cbwi_m2",&weight_cbwi_m2,"weight_cbwi_m2/F");
+   tOutput->Branch("weight_cbwi_m1",&weight_cbwi_m1,"weight_cbwi_m1/F");
+   tOutput->Branch("weight_cbwi_p1",&weight_cbwi_p1,"weight_cbwi_p1/F");
+   tOutput->Branch("weight_cbwi_p2",&weight_cbwi_p2,"weight_cbwi_p2/F");
+  
+
+    tOutput->Branch("weight_SM_size",&weight_SM_size,"weight_SM_size/F");
+
+    tOutput->Branch("weight_ctwi_m2_size",&weight_ctwi_m2_size,"weight_ctwi_m2_size/F");
+    tOutput->Branch("weight_ctwi_m1_size",&weight_ctwi_m1_size,"weight_ctwi_m1_size/F");
+    tOutput->Branch("weight_ctwi_p1_size",&weight_ctwi_p1_size,"weight_ctwi_p1_size/F");
+    tOutput->Branch("weight_ctwi_p2_size",&weight_ctwi_p2_size,"weight_ctwi_p2_size/F");
+
+    tOutput->Branch("weight_cbwi_m2_size",&weight_cbwi_m2_size,"weight_cbwi_m2_size/F");
+    tOutput->Branch("weight_cbwi_m1_size",&weight_cbwi_m1_size,"weight_cbwi_m1_size/F");
+    tOutput->Branch("weight_cbwi_p1_size",&weight_cbwi_p1_size,"weight_cbwi_p1_size/F");
+    tOutput->Branch("weight_cbwi_p2_size",&weight_cbwi_p2_size,"weight_cbwi_p2_size/F");
+  }
+  
+        if(Rwgt_>0)
+      {  
+        weight_SM_size+=Rwgt_Weight[0];
+        weight_ctwi_p1_size+=Rwgt_Weight[1];
+        weight_ctwi_m1_size+=Rwgt_Weight[2];
+        weight_ctwi_p2_size+=Rwgt_Weight[3];
+        weight_ctwi_m2_size+=Rwgt_Weight[4];
+        weight_cbwi_p1_size+=Rwgt_Weight[5];
+        weight_cbwi_m1_size+=Rwgt_Weight[6];
+        weight_cbwi_p2_size+=Rwgt_Weight[7];
+        weight_cbwi_m2_size+=Rwgt_Weight[8];
+ 
+        weight_SM = Rwgt_Weight[0];
+        weight_ctwi_p1 = Rwgt_Weight[1];
+        weight_ctwi_m1 = Rwgt_Weight[2];
+        weight_ctwi_p2 = Rwgt_Weight[3];
+        weight_ctwi_m2 = Rwgt_Weight[4];
+        weight_cbwi_p1 = Rwgt_Weight[5];
+        weight_cbwi_m1 = Rwgt_Weight[6];
+        weight_cbwi_p2 = Rwgt_Weight[7];
+        weight_cbwi_m2 = Rwgt_Weight[8];
+      }
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
