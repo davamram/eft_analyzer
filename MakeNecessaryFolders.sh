@@ -1,6 +1,7 @@
 #!/bin/sh
 
 
+mkdir bin
 mkdir builds
 mkdir data
 cd data
