@@ -1,6 +1,6 @@
 # code_for_EFT_analysis
 
-Creat the following directories :
+Creat the following directories (or run shell script included):
 
 /data/
 
@@ -49,10 +49,4 @@ In Plot.cpp :
   
  After modifying a file, run "Make" before using ./bin/... commands.
 
-
-
-
-
-
-# Code_EFT_Analysis
-# EFT_Analysis
+ 
