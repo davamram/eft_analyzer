@@ -1,6 +1,7 @@
 #!/bin/sh
 
 
+echo 'Creating folders'
 mkdir bin
 mkdir builds
 mkdir data
