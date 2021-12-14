@@ -66,7 +66,7 @@ all: $(EXECUTABLE)
 	@echo "\n"\
 	"*********************************\n"\
 	"** La compilation est finie :) **\n"\
-	"**   Woaaa quel codeur... <3   **\n"\
+	"**   Bien joue gros batard... <3   **\n"\
 	"**  Atom > Vim > All > Emacs  **\n"\
 	"*********************************\n"
 #	mv ./$(SOURCES_DIR)/*.o ./$(BUILDS_DIR)/
