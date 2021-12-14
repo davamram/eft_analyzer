@@ -14,7 +14,7 @@ using namespace std;
 
 int main()
 {
-  int nSamples = 20;
+  int nSamples = 21;
   int modes = 1;
   string* suffix = new string[nSamples];
   string* prefix = new string[modes];
@@ -50,12 +50,12 @@ prefix[0]="RootFile";
   {
     for (int i=0; i<nSamples; i++)
     {
-      string nb = to_string(i);
+      string nb = to_string(i+1);
       suffix[i]= nb;
       cout<<"Cooking "+prefix[j] + suffix[i]+".root"<<endl;
 
      ///////////////////////////Choose Input Path files//////////////////////////////////////
-     string inputPath = "/eos/user/c/cgreenbe/";
+     string inputPath = "/eos/user/c/cgreenbe/ROOTfiles/t_channel_EFT_atLO_nomadspin_ctw_cbw_cptb_ctwi_cbwi_cptbi_reweight_output/";
      string inputName = inputPath + prefix[j] + suffix[i] + ".root";
       
       
@@ -66,7 +66,7 @@ prefix[0]="RootFile";
      singleTopLHEAnalyzer[i]->Loop();
       
      ///////////////////////////Choose Output Path files//////////////////////////////////////
-     string outputPath = "";
+     string outputPath = "/eos/user/c/cgreenbe/ROOTfiles/CookedROOTfiles/t_channel_EFT_atLO_nomadspin_ctw_cbw_cptb_ctwi_cbwi_cptbi_reweight/";
      string commandline = "mv output.root " + outputPath + outputName;
 
      system(commandline.c_str());
