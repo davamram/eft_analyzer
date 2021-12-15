@@ -1,7 +1,5 @@
 #!/bin/sh
 
-
-echo 'Creating folders'
 mkdir bin
 mkdir builds
 mkdir data
@@ -22,5 +20,6 @@ mkdir ratio_madgraph
 mkdir top_reco
 cd top_reco
 mkdir ATCGRoot
+echo 'Folders created :)'
 
 cd ../../..
