@@ -1089,7 +1089,7 @@ int main ()
   
 
   //////////cbWi Plots//////////
-  Compare_3Histos(SM, SM, SM, "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", "SM", "SM", "SM", "cbwi", "results/STreco_selection/cbWi_");
+  Compare_3Histos(SM, SM, SM, "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", "SM", "SM", "SM", "cbwi", "results");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_mass",20, 164, 180, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbWi_");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
