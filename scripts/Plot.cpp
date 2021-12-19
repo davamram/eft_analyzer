@@ -1095,6 +1095,10 @@ int main ()
   int k = 0;
   string TreeName;
   string FileName;
+
+  TTree* ctwi_m1;
+  TTree* cbwi_m2;
+
   for (int i=0; i<6; i++)
   {
     for(int j=0 ; j<8 ; j++)
