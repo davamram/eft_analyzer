@@ -25,6 +25,14 @@ bool log_fity = false; //Turn on log scale in Y axis
 bool diff_xsection = false; //Change this to have histograms normalized to Xsection
 bool flows = false; //Change this to Active/Deactivate Overflow and Underflow for all Histograms
 
+TTree* FileReader(string inputPath)
+{
+  TFile* RootFile = new TFile(inputPath.c_str(),"READ");
+  TTree* Tree;
+  Tree = (TTree*) RootFile->Get("Tree");
+  return Tree;
+} 
+
 TH1D* GetHistoWeight(TTree* t, string variable, int nbins, double xmin, double xmax, string cut, string name)
 {
         string sxmin, sxmax, snbins;
@@ -1069,72 +1077,66 @@ void Compare_9Histos(int nbins, double xmin, double xmax, string selection1, str
 }
 
 
-int main (){
-int nbfiles = 21;
-string suffix[nbfiles];
-
-suffix[0] = "output_top_SM.root"; //SM
-
-suffix[1] = "output_top_cbwi_n2.root"; // cbWi = -2
-suffix[2] = "output_top_cbwi_n1.root"; //cbWi = -1
-suffix[3] = "output_top_cbwi_p1.root"; //cbWi = 1
-suffix[4] = "output_top_cbwi_p2.root"; //cbWi = 2
-
-suffix[5] = "output_top_ctwi_n2.root"; //ctWi = -2
-suffix[6] = "output_top_ctwi_n1.root"; //ctWi = -1
-suffix[7] = "output_top_ctwi_p1.root"; //ctWi = 1
-suffix[8] = "output_top_ctwi_p2.root"; //ctWi = 2
-
-suffix[9] = "output_top_cbwi_n5.root"; //cbWi = -5
-suffix[10] = "output_top_cbwi_p5.root"; //cbWi = 5
-suffix[11] = "output_top_ctwi_n5.root"; //ctWi = -5
-suffix[12] = "output_top_ctwi_p5.root"; //ctWi = 5
-
-suffix[13] = "rwgt_ctwi_p3.root"; //Rwgt at ctwi = 3
-suffix[14] = "rwgt_ctwi2p5.root"; //Rwgt at ctwi = 2.5
-suffix[15] = "rwgt_cbwi_p3.root"; //Rwgt at cbwi = 3
-suffix[16] = "rwgt_cbwi2p5.root"; //Rwgt at cbwi = 2.5
-
-suffix[17] = "output_top_SM_1dim6.root"; //Dim6 = 1 ; SM
-suffix[18] = "output_top_ctwi_m2_1dim6.root"; //Dim6 = 1 ; ctwi = -2
-suffix[19] = "output_top_ctwi_p2_1dim6.root"; //Dim6 = 1 ; ctwi = 2
-suffix[20] = "output_top_cbwi_m2_1dim6.root"; //Dim6 = 1 ; cbwi = -2
-//suffix[21] = "output_top_cbwi_p2_1dim6.root"; //Dim6 = 1 ; cbwi = 2
-
-TFile* fInput[nbfiles];
-TTree* tInput[nbfiles];
-string inputName;
-
-for (int i=0; i<nbfiles; i++)
+int main ()
 {
-  inputName = "data/madgraph/output/" + suffix[i];
-  //inputName = "data/madgraph/output/Streco_selection/" + suffix[i];
-  fInput[i] = new TFile(inputName.c_str(),"READ");
-  tInput[i] = (TTree*) fInput[i]->Get("Tree");
-}
+
+  string StandalonPath = "/gridgroup/cms/greenberg/Pheno/eft_lhe_analyzer/data/madgraph/CutData/Standalone/";
+  string RwgtPath = "/gridgroup/cms/greenberg/Pheno/eft_lhe_analyzer/data/madgraph/CutData/Rwgted/";
+  string FileIndex = "t_channel_";
+
+  // SM input file
+  TTree* SM = FileReader(StandalonPath + FileIndex + "SM.root");
+  
+
+  string WilsonCoeff[6] = {"cbw","cbwi","ctw","ctwi","cptb","cptbi"};
+  string WilsonValue[8] = {"_m10","_m5","_m2","_m1","_p1","_p2","_p5","_p10"};
+
+  // ctw input files
+  int k = 0;
+  string TreeName;
+  string FileName;
+  for (int i=0; i<6; i++)
+  {
+    for(int j=0 ; j<8 ; j++)
+    {
+      FileName = StandalonPath+FileIndex+WilsonCoeff[i]+WilsonValue[j]+".root";
+      if(gSystem->AccessPathName(FileName.c_str()))
+      {
+        cout<<FileName<<" doesn't exist" <<endl;
+        continue;
+      }
+      else
+      {
+        TreeName = WilsonCoeff[i] + WilsonValue[j];
+        TTree* TreeName = FileReader(FileName);
+      }
+    }
+
+  }
+
+
 
 
   //////////cbWi Plots//////////
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "cbwi", "results/STreco_selection/cbWi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_mass",20, 164, 180, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "cbwi", "results/cbWi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "cbwi", "results/STreco_selection/cbWi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "cbwi", "results/cbwi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "W_pt", 20, 0, 120, "1", "W Pt [GeV]", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "cbwi", "results/cbwi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "lepton_pt", 20, 0, 100, "1", "Lepton Pt [GeV]", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "cbwi", "results/cbwi_");
-	//Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosTheta", 20, -1, 1, "1", "cos(#theta)", "", "legendUpLeft", "dim6top", suffix[0], suffix[1], suffix[4], "cbwi", "results/STreco_selection/cbWi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_mass",20, 164, 180, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbWi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "W_pt", 20, 0, 120, "1", "W Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "lepton_pt", 20, 0, 100, "1", "Lepton Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
+	//Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosTheta", 20, -1, 1, "1", "cos(#theta)", "", "legendUpLeft", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
 
 
   //////////ctWi Plots//////////
-  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", suffix[0], suffix[5], suffix[8], "ctwi", "results/STreco_selection/ctWi_");
-  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "top_mass",25, 150, 190, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", suffix[0], suffix[5], suffix[8], "ctwi", "results/ctWi_");
-  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", suffix[0], suffix[5], suffix[8], "ctwi", "results/STreco_selection/ctWi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "ctwi", "results/ctwi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "W_pt", 20, 0, 120, "1", "W Pt [GeV]", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "ctwi", "results/ctwi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "lepton_pt", 20, 0, 100, "1", "Lepton Pt [GeV]", "", "legendUpRight", "dim6top", suffix[0], suffix[1], suffix[4], "ctwi", "results/ctwi_");
-	//Compare_3Histos(tInput[0], tInput[5], tInput[8], "cosTheta", 20, -1, 1, "1", "cos(#theta)", "", "legendUpLeft", "dim6top", suffix[0], suffix[5], suffix[8], "ctwi", "results/STreco_selection/ctWi_");
+  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[5], StandaloneFiles[8], "ctwi", "results/STreco_selection/ctWi_");
+  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "top_mass",25, 150, 190, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[5], StandaloneFiles[8], "ctwi", "results/ctWi_");
+  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[5], StandaloneFiles[8], "ctwi", "results/STreco_selection/ctWi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "ctwi", "results/ctwi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "W_pt", 20, 0, 120, "1", "W Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "ctwi", "results/ctwi_");
+  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "lepton_pt", 20, 0, 100, "1", "Lepton Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "ctwi", "results/ctwi_");
+	//Compare_3Histos(tInput[0], tInput[5], tInput[8], "cosTheta", 20, -1, 1, "1", "cos(#theta)", "", "legendUpLeft", "dim6top", StandaloneFiles[0], StandaloneFiles[5], StandaloneFiles[8], "ctwi", "results/STreco_selection/ctWi_");
 
-  
-  
+
   ////////////EFT VS SM////////////
   //costheta:
   //Ratio_EFT_SM(tInput[0],tInput[3],tInput[4],tInput[1],tInput[2],"cosTheta","cbwi",5,-1,1,"1","cos#theta","ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_cosTheta.pdf","lepton");
@@ -1196,182 +1198,6 @@ if(reweight)
   //Compare_2Histos(tInput[1], tInput[20], "lepton_pt", 20, 0, 60, "1", "Pt_{lepton} [GeV]", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = 2", "Dim6 = 1", "results/dim6_cbwi_m2"); 
   //Compare_2Histos(tInput[1], tInput[20], "W_pt", 20, 0, 100, "1", "Pt_{W} [GeV]", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = -2", "Dim6 = 1", "results/dim6_cbwi_m2");
 
-
-
-
-
-
-/*
-  //Plot_SM
-  //Compare_2Histos(tInput[0], tInput[17], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[17], "results/dim6top_compareSM_CosTheta.pdf"  );
-  Compare_2Histos(tInput[0], tInput[17], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], "results/dim6top_compareSM_CosThetaStar.pdf");
-  //Compare_2Histos(tInput[0], tInput[17], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], "results/dim6top_compareSM_PhiStar.pdf");
-  //Compare_2Histos(tInput[0], tInput[17], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], "results/dim6top_compareSM_top_pt.pdf");
-  Compare_2Histos(tInput[0], tInput[17], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], "results/dim6top_compareSM_W_pt.pdf");
-  Compare_2Histos(tInput[0], tInput[17], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[17], suffix[17], "results/dim6top_compareSM_lepton_pt.pdf");
-	Compare_2Histos(tInput[0], tInput[17], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], "results/dim6top_compareSM_lepton_E_Wframe.pdf");
-  Compare_2Histos(tInput[0], tInput[17], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], "results/dim6top_compareSM_top_mass.pdf");
-  Compare_2Histos(tInput[0], tInput[17], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], "results/dim6top_compareSM_W_mass.pdf");
-
-  //MadGraph
-
-  //Plots ctW
-	Compare_3Histos(tInput[0], tInput[10], tInput[12], "cosTheta", 20, -1, 1, "1", "cos#theta", "a.u.", "legendUpLeft", "Operateur EFT", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_CosTheta.pdf");/*
-	Compare_3Histos(tInput[0], tInput[10], tInput[12], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_CosThetaStar.pdf");
-	Compare_3Histos(tInput[0], tInput[10], tInput[12], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_PhiStar.pdf");
-  Compare_3Histos(tInput[0], tInput[10], tInput[12], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_top_pt.pdf");
-  Compare_3Histos(tInput[0], tInput[10], tInput[12], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "Number of events", "legendUpRight", "dim6top", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_W_pt.pdf");
-  /*Compare_3Histos(tInput[0], tInput[10], tInput[12], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_lepton_pt.pdf");
-	Compare_3Histos(tInput[0], tInput[10], tInput[12], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_lepton_E_Wframe.pdf");
-  Compare_3Histos(tInput[0], tInput[10], tInput[12], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "a.u.", "legendUpRight", "Operateur EFT", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_top_mass.pdf");
-  /*Compare_3Histos(tInput[0], tInput[10], tInput[12], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_W_mass.pdf");
-  Compare_3Histos(tInput[0], tInput[10], tInput[12], "W_transverse_mass",20, 50, 140, "1", "M_{T,W} (GeV)", "number of events", "legendUpRight", "Operateur de dimension 6", suffix[0], suffix[10], suffix[12], "results/madgraph_dim6top_ctW_W_transverse_mass.pdf");
-
-	//Plots ctWI*/
-	//Compare_3Histos(tInput[0], tInput[14], tInput[16], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[14], suffix[16], "results/madgraph_dim6top_ctWI_CosTheta.pdf");
-	//Compare_3Histos(tInput[0], tInput[14], tInput[16], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[14], suffix[16], "results/madgraph_dim6top_ctWI_CosThetaStar.pdf");
-	//Compare_3Histos(tInput[0], tInput[14], tInput[16], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[14], suffix[16], "results/madgraph_dim6top_ctWI_PhiStar.pdf");
-  /*(tInput[0], tInput[14], tInput[16], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[14], suffix[16], "results/madgraph_dim6top_ctWI_top_pt.pdf");
-  //Compare_3Histos(tInput[0], tInput[14], tInput[16], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[14], suffix[16], "results/madgraph_dim6top_ctWI_W_pt.pdf");
-  //Compare_3Histos(tInput[0], tInput[14], tInput[16], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[14], suffix[16], "results/madgraph_dim6top_ctWI_lepton_pt.pdf");
-	//Compare_3Histos(tInput[0], tInput[14], tInput[16], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0],suffix[14], suffix[16], "results/madgraph_dim6top_ctWI_lepton_E_Wframe.pdf");
-  *///Compare_3Histos(tInput[0], tInput[14], tInput[16], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[14], suffix[16], "results/madgraph_dim6top_ctwI_top_mass.pdf");
-  /*Compare_3Histos(tInput[0], tInput[14], tInput[16], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[14], suffix[16], "results/madgraph_dim6top_W_mass.pdf");
-
-	//Plots cbWI
-	//Compare_3Histos(tInput[0], tInput[2], tInput[4], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbWI_CosTheta.pdf");
-	Compare_3Histos(tInput[0], tInput[2], tInput[4], "cosThetaStar", 20, -1, 1, "1", "cos(#theta*)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbWI_CosThetaStar.pdf");
-	Compare_3Histos(tInput[0], tInput[2], tInput[4], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbWI_PhiStar.pdf");
-  Compare_3Histos(tInput[0], tInput[2], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbWI_top_pt.pdf");
-  //Compare_3Histos(tInput[0], tInput[2], tInput[4], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbWI_W_pt.pdf");
-  //Compare_3Histos(tInput[0], tInput[2], tInput[4], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbWI_lepton_pt.pdf");
-	//Compare_3Histos(tInput[0], tInput[2], tInput[4], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbWI_lepton_E_Wframe.pdf");
-  *///Compare_3Histos(tInput[0], tInput[2], tInput[4], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbwI_top_mass.pdf");
-  /*Compare_3Histos(tInput[0], tInput[2], tInput[4], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[2], suffix[4], "results/madgraph_dim6top_cbwI_W_mass.pdf");
-
-  //Plots cptbI
-	//Compare_3Histos(tInput[0], tInput[6], tInput[8], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_CosTheta.pdf");
-	*///Compare_3Histos(tInput[0], tInput[6], tInput[8], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_CosThetaStar.pdf");
-	//Compare_3Histos(tInput[0], tInput[6], tInput[8], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_PhiStar.pdf");
-  //Compare_3Histos(tInput[0], tInput[6], tInput[8], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_top_pt.pdf");
-  //Compare_3Histos(tInput[0], tInput[6], tInput[8], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_W_pt.pdf");
-  //Compare_3Histos(tInput[0], tInput[6], tInput[8], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_lepton_pt.pdf");
-	//Compare_3Histos(tInput[0], tInput[6], tInput[8], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_lepton_E_Wframe.pdf");
-  //Compare_3Histos(tInput[0], tInput[6], tInput[8], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_top_mass.pdf");
-  /*Compare_3Histos(tInput[0], tInput[6], tInput[8], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[6], suffix[8], "results/madgraph_dim6top_cptbI_W_mass.pdf");
-
-  //MadSpin
-
-  //Plots ctW
-	Compare_3Histos(tInput[17], tInput[27], tInput[29], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[27], suffix[29], "results/madspin_dim6top_ctW_CosTheta.pdf");
-	Compare_3Histos(tInput[17], tInput[27], tInput[29], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[27], suffix[29], "results/madspin_dim6top_ctW_CosThetaStar.pdf");
-	Compare_3Histos(tInput[17], tInput[27], tInput[29], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[27], suffix[29], "results/madspin_dim6top_ctW_PhiStar.pdf");
-  Compare_3Histos(tInput[17], tInput[27], tInput[29], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[27],suffix[29], "results/madspin_dim6top_ctW_top_pt.pdf");
-  Compare_3Histos(tInput[17], tInput[27], tInput[29], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[27], suffix[29], "results/madspin_dim6top_ctW_W_pt.pdf");
-  //Compare_3Histos(tInput[17], tInput[27], tInput[29], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[27], suffix[29], "results/madspin_dim6top_ctW_lepton_pt.pdf");
-	//Compare_3Histos(tInput[17], tInput[27], tInput[29], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[27], suffix[29], "results/madspin_dim6top_ctW_lepton_E_Wframe.pdf");
-  Compare_3Histos(tInput[17], tInput[27], tInput[29], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[27], suffix[29], "results/madspin_dim6top_ctW_top_mass.pdf");
-  Compare_3Histos(tInput[17], tInput[27], tInput[29], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[27], suffix[29], "results/madspin_dim6top_ctW_W_mass.pdf");
-
-
-  //Plots ctWI
-	Compare_3Histos(tInput[17], tInput[31], tInput[33], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[31], suffix[33], "results/madspin_dim6top_ctWI_CosTheta.pdf");
-	Compare_3Histos(tInput[17], tInput[31], tInput[33], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0],  suffix[31],  suffix[33], "results/madspin_dim6top_ctWI_CosThetaStar.pdf");
-	Compare_3Histos(tInput[17], tInput[31], tInput[33], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[31],  suffix[33], "results/madspin_dim6top_ctWI_PhiStar.pdf");
-  Compare_3Histos(tInput[17], tInput[31], tInput[33], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top",  suffix[0],  suffix[31],  suffix[33], "results/madspin_dim6top_ctWI_top_pt.pdf");
-  //Compare_3Histos(tInput[17], tInput[31], tInput[33], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[31],  suffix[33], "results/madspin_dim6top_ctWI_W_pt.pdf");
-  //Compare_3Histos(tInput[17], tInput[31], tInput[33], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top",  suffix[0], suffix[31],  suffix[33], "results/madspin_dim6top_ctWI_lepton_pt.pdf");
-	//Compare_3Histos(tInput[17], tInput[31], tInput[33], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top",  suffix[0],  suffix[31], suffix[33], "results/madspin_dim6top_ctWI_lepton_E_Wframe.pdf");
-  Compare_3Histos(tInput[17], tInput[31], tInput[33], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[31], suffix[33], "results/madspin_dim6top_ctWI_top_mass.pdf");
-  Compare_3Histos(tInput[17], tInput[31], tInput[33], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[31], suffix[33], "results/madspin_dim6top_ctWI_W_mass.pdf");
-
-
-	//Plots cbWI
-	//Compare_3Histos(tInput[17], tInput[19], tInput[21], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[19], suffix[21], "results/madspin_dim6top_cbWI_CosTheta.pdf");
-	Compare_3Histos(tInput[17], tInput[19], tInput[21], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[19],suffix[21], "results/madspin_dim6top_cbWI_CosThetaStar.pdf");
-	Compare_3Histos(tInput[17], tInput[19], tInput[21], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top",  suffix[0], suffix[19], suffix[21], "results/madspin_dim6top_cbWI_PhiStar.pdf");
-  Compare_3Histos(tInput[17], tInput[19], tInput[21], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[19], suffix[21], "results/madspin_dim6top_cbWI_top_pt.pdf");
-  Compare_3Histos(tInput[17], tInput[19], tInput[21], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[19], suffix[21], "results/madspin_dim6top_cbWI_W_pt.pdf");
-  //Compare_3Histos(tInput[17], tInput[19], tInput[21], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top",  suffix[0], suffix[19], suffix[21], "results/madspin_dim6top_cbWI_lepton_pt.pdf");
-	//Compare_3Histos(tInput[17], tInput[19], tInput[21], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[19], suffix[21], "results/madspin_dim6top_cbWI_lepton_E_Wframe.pdf");
-  Compare_3Histos(tInput[17], tInput[19], tInput[21], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[19], suffix[21], "results/madspin_dim6top_cbwI_top_mass.pdf");
-  Compare_3Histos(tInput[17], tInput[19], tInput[21], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[19], suffix[21], "results/madspin_dim6top_cbwI_W_mass.pdf");
-
-  //Plots cptbI
-	//Compare_3Histos(tInput[17], tInput[23], tInput[25], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[23], suffix[25], "results/madspin_dim6top_cptbI_CosTheta.pdf");
-	//Compare_3Histos(tInput[17], tInput[23], tInput[25], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top",  suffix[0],  suffix[23], suffix[25], "results/madspin_dim6top_cptbI_CosThetaStar.pdf");
-	Compare_3Histos(tInput[17], tInput[23], tInput[25], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[23], suffix[25], "results/madspin_dim6top_cptbI_PhiStar.pdf");
-  //Compare_3Histos(tInput[17], tInput[23], tInput[25], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[23], suffix[25], "results/madspin_dim6top_cptbI_top_pt.pdf");
-  //Compare_3Histos(tInput[17], tInput[23], tInput[25], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top",  suffix[0], suffix[23],  suffix[25], "results/madspin_dim6top_cptbI_W_pt.pdf");
-  //Compare_3Histos(tInput[17], tInput[23], tInput[25], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top",  suffix[0], suffix[23], suffix[25], "results/madspin_dim6top_cptbI_lepton_pt.pdf");
-	//Compare_3Histos(tInput[17], tInput[23], tInput[25], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[23], suffix[25], "results/madspin_dim6top_cptbI_lepton_E_Wframe.pdf");
-  Compare_3Histos(tInput[17], tInput[23], tInput[25], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[23], suffix[25], "results/madspin_dim6top_cptbI_top_mass.pdf");
-  Compare_3Histos(tInput[17], tInput[23], tInput[25], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[23], suffix[25], "results/madspin_dim6top_cptbI_W_mass.pdf");
-
-  //Madgraph + MadSpin
-
-  //cbwi
-  //Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_CosTheta.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_CosThetaStar.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_PhiStar.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_top_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_W_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_lepton_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_lepton_E_Wframe.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_top_mass.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[4], tInput[21], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[4], suffix[21], "results/compare_dim6top_cbwI_W_mass.pdf");
-
-  //cptbI
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_CosTheta.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_CosThetaStar.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_PhiStar.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_top_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_W_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_lepton_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_lepton_E_Wframe.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_top_mass.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[8], tInput[25], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[8], suffix[25], "results/compare_dim6top_cptbI_W_mass.pdf");
-
-  //ctw
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_CosTheta.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_CosThetaStar.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_PhiStar.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_top_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_W_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_lepton_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_lepton_E_Wframe.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "Operateur de dimension 6", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_top_mass.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[12], tInput[29], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[12], suffix[29], "results/compare_dim6top_ctw_W_mass.pdf");
-
-
-  //ctwI
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_CosTheta.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_CosThetaStar.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* (rad)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_PhiStar.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "top_pt", 20, 0, 400, "1", "Top Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_top_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "W_pt", 20, 0, 100, "1", "W Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_W_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "lepton_pt", 20, 0, 100, "1", "Lepton Pt (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_lepton_pt.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "lepton_E_Wframe", 20, 25, 60, "1", "Lepton Energy (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_lepton_E_Wframe.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "top_mass",20, 100, 400, "1", "Top Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_top_mass.pdf");
-  Compare_4Histos(tInput[0], tInput[17], tInput[16], tInput[33], "W_mass",20, 0, 140, "1", "W Mass (GeV)", "normalized", "legendUpRight", "dim6top", suffix[0], suffix[17], suffix[16], suffix[33], "results/compare_dim6top_ctwI_W_mass.pdf");
-*/
-
-  //-----------------Ratio EFT/SM-------------//
-
-  //ctWI
-
-  //Ratio_EFT_SM(tInput[0], tInput[15], tInput[16], tInput[13], tInput[14], "cosTheta","ctwi", 5, -1, 1,"1", "cos#theta", "ratio EFT/SM","results/ratio_madgraph/ratio_ctwi_cosTheta.pdf");
-  //Ratio_EFT_SM(tInput[0], tInput[15], tInput[16], tInput[13], tInput[14], "PhiStar","ctwi",20, 0, 6.2831 ,"nature_lepton == 1", "#phi^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_ctwi_PhiStar.pdf","elec");
-  //Ratio_EFT_SM(tInput[0], tInput[15], tInput[16], tInput[13], tInput[14], "PhiStar","ctwi",20, 0, 6.2831 ,"nature_lepton == 2", "#phi^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_ctwi_PhiStar.pdf","muon");
-  //Ratio_EFT_SM(tInput[0], tInput[15], tInput[16], tInput[13], tInput[14], "cosThetaStar","ctwi", 3, -1, 1 ,"1", "cos#theta^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_ctwi_cosThetaStar.pdf");
-
-/*  Ratio_EFT_SM(tInput[0], tInput[3], tInput[4], tInput[1], tInput[2], "cosTheta","cbwi", 5, -1, 1,"1", "cos#theta", "ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_cosTheta.pdf");
-  Ratio_EFT_SM(tInput[0], tInput[3], tInput[4], tInput[1], tInput[2], "PhiStar","cbwi", 5, 0, 2*TMath::Pi(),"1", "#phi^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_PhiStar.pdf");*/
-  //Ratio_EFT_SM(tInput[0], tInput[3], tInput[4], tInput[1], tInput[2], "cosThetaStar","cbwi", 20, -1, 1 ,"nature_lepton==1", "cos#theta^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_cosThetaStar.pdf", "elec");
-  //Ratio_EFT_SM(tInput[0], tInput[3], tInput[4], tInput[1], tInput[2], "cosThetaStar","cbwi", 20, -1, 1 ,"nature_lepton==2", "cos#theta^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_cosThetaStar.pdf", "muon");
- 
- 
-  /*Compare_3Histos(tInput[0], tInput[13], tInput[14], "cosTheta", 20, -1, 1, "1", "cos#theta", "normalized", "legendUpLeft", "dim6top", suffix[0], suffix[13], suffix[14], "results/madgraph_dim6top_ctWI_CosTheta_test.pdf");*/
 
   return 0;
 }
