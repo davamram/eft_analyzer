@@ -1082,7 +1082,7 @@ int main ()
 
   string StandalonPath = "/gridgroup/cms/greenberg/Pheno/eft_lhe_analyzer/data/madgraph/CutData/Standalone/";
   string RwgtPath = "/gridgroup/cms/greenberg/Pheno/eft_lhe_analyzer/data/madgraph/CutData/Rwgted/";
-  string FileIndex = "t_channel_";
+  string FileIndex = "output_t_channel_";
 
   // SM input file
   TTree* SM = FileReader(StandalonPath + FileIndex + "SM.root");
@@ -1102,7 +1102,7 @@ int main ()
       FileName = StandalonPath+FileIndex+WilsonCoeff[i]+WilsonValue[j]+".root";
       if(gSystem->AccessPathName(FileName.c_str()))
       {
-        cout<<FileName<<" doesn't exist" <<endl;
+        //cout<<FileName<<" doesn't exist" <<endl;
         continue;
       }
       else
