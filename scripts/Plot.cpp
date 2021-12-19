@@ -1100,7 +1100,7 @@ int main ()
     for(int j=0 ; j<8 ; j++)
     {
       FileName = StandalonPath+FileIndex+WilsonCoeff[i]+WilsonValue[j]+".root";
-      if(gSystem->AccessPathName(FileName.c_str()))
+      if(gSystem->AccessPathName(FileName.c_str())) // Checkout if file exists
       {
         //cout<<FileName<<" doesn't exist" <<endl;
         continue;
@@ -1108,17 +1108,18 @@ int main ()
       else
       {
         TreeName = WilsonCoeff[i] + WilsonValue[j];
+        cout<<"Creating Tree: " + TreeName <<endl;
         TTree* TreeName = FileReader(FileName);
       }
     }
-
   }
 
+  TTree* RwgtTree = FileReader((RwgtPath+"output_t_channel_ctwI_cbwI_cptbI_rwgtATcbwi2p5.root").c_str());
 
 
 
   //////////cbWi Plots//////////
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
+  Compare_3Histos(SM, ctwi_m2, cbwi_m2, "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", SM, ctwi_m2, cbwi_m2, "cbwi", "results/STreco_selection/cbWi_");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_mass",20, 164, 180, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbWi_");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
