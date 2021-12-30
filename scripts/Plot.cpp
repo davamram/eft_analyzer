@@ -27,6 +27,7 @@ bool flows = false; //Change this to Active/Deactivate Overflow and Underflow fo
 
 TTree* FileReader(string inputPath)
 {
+  // Fct to read ROOT files
   TFile* RootFile = new TFile(inputPath.c_str(),"READ");
   TTree* Tree;
   Tree = (TTree*) RootFile->Get("Tree");
@@ -295,166 +296,18 @@ void Ratio_EFT_SM(TTree* t1, TTree* t2, TTree* t3, TTree* t4, TTree* t5, string 
   ratio_file->Close();
 }
 
-void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins, double xmin, double xmax, string selection, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string legendEntry3, string EFT, string Name){
-  
-  Name += variable;
-
-  TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection, "Histo_1");
-  TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection, "Histo_2");
-  TH1D* Histo_3 = GetHistoWeight(t3, variable, nbins, xmin, xmax, selection, "Histo_3");
-
-  Histo_1->SetStats(kFALSE);
-  Histo_2->SetStats(kFALSE);
-  Histo_3->SetStats(kFALSE);
-
-  TCanvas* Canvas = new TCanvas("Canvas","Canvas");
-  Histo_1->SetTitle("");
-
-  if(log_fity) 
-  {
-    Canvas->SetLogy();
-    Name += "_log"; 
-    legendY += " log";
-  }
-  if(normalization) 
-  {
-    Double_t integral1 = 1/Histo_1->Integral();
-    Histo_1->Scale(integral1);
-    
-    Double_t integral2 = 1/Histo_2->Integral();
-    Histo_2->Scale(integral2);
-    
-    Double_t integral3 = 1/Histo_3->Integral();
-    Histo_3->Scale(integral3);
-
-    Name += "_normalized";
-    legendY += " normalized";
-  }
-/*
-  if(diff_xsection)
-  {
-    //int N1 = Histo_1->GetEntries() , N2 = Histo_2->GetEntries() , N3 = Histo_3->GetEntries();
-    int N_initial = 1000000;
-    double scale1 = 35.2863/N_initial , scale2 = 37.3838/N_initial , scale3 = 37.3893/N_initial ;
-    Histo_1->Scale(scale1);
-    Histo_2->Scale(scale2);
-    Histo_3->Scale(scale3);
-
-    Name += "_xsection" ;
-    legendY += " #sigma";
-  }
-
-  if (legendX == "Top Mass (GeV)")
-    {
-      if (normalization == false) Histo_1->SetAxisRange(0.0001,max*1.5,"Y");
-    }
-  if (legendX == "W Mass (GeV)")
-  {
-    Histo_1->SetAxisRange(0.001,max*1.5,"Y");
-  }
-
-  if(log_fity==false)
-  {
-    if(variable == "PhiStar")
-    {
-      Histo_1->SetMinimum(0);
-      double max_phi = Histo_1->GetMaximum();
-      Histo_1->SetMaximum(max_phi*1.5);
-    }
-    if(variable == "cosThetaStar")
-    {
-      Histo_1->SetMinimum(0);
-      double max_cos = Histo_1->GetMaximum();
-      Histo_1->SetMaximum(max_cos*1.28);
-    }
-  }
-
-  else
-  {
-    if(variable == "PhiStar")
-    {
-      Histo_1->SetMinimum(0.1);
-      double max_1 = Histo_1->GetMaximum();
-      Histo_1->SetMaximum(max_1*40);
-
-    }
-    if(variable =="cosThetaStar")
-    {
-      Histo_1->SetMinimum(0.1);     
-      double max_1 = Histo_1->GetMaximum();
-      Histo_1->SetMaximum(max_1*40);
-    }
-  }
-  */
-  double max = (Histo_1->GetMaximum()>Histo_2->GetMaximum()) ? Histo_1->GetMaximum() : Histo_2->GetMaximum();
-  Histo_1->SetMaximum(max*1.4 );
-
-  Histo_1->SetXTitle(legendX.c_str());
-  Histo_1->SetYTitle(legendY.c_str());
-  Histo_1->SetLineColor(kRed);
-  Histo_1->SetLineWidth(2);
-  Histo_1->Draw();
-
-  
-  Histo_2->SetLineColor(kBlue);
-  Histo_2->SetLineWidth(2);
-  Histo_2->Draw("SAME");
-
-  
-  Histo_3->SetLineColor(kOrange);
-  Histo_3->SetLineWidth(2);
-  Histo_3->Draw("SAME");
-
-
- double lx0, ly0, lx1, ly1;
-  if (legendPlace=="legendUpLeft"){
-	 lx0 = 0.2;
-	 ly0 = 0.7;
-	 lx1 = 0.6;
-	 ly1 = 0.95;
-  }
-   if (legendPlace=="legendUpRight"){
-	 lx0 = 0.6;
-	 ly0 = 0.75; //Lower Y
-	 lx1 = 0.99;
-	 ly1 = 0.99; //Upper Y
-  }
-  
-  TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
-  legend->SetFillColor(kWhite);
-  legend->SetTextSize(0.04);
-  if(EFT == "cbwi")
-  {
-    legend->AddEntry(Histo_1->GetName(), "C_{bW}^{I}/#\Lambda^{2} = 0 (TeV^{-2})","l");
-    legend->AddEntry(Histo_2->GetName(), "C_{bW}^{I}/#\Lambda^{2} = -2 (TeV^{-2})","l");
-    legend->AddEntry(Histo_3->GetName(), "C_{bW}^{I}/#\Lambda^{2} = 2 (TeV^{-2})","l");
-  } 
-
-  if(EFT == "ctwi")
-  {
-    legend->AddEntry(Histo_1->GetName(), "C_{tW}^{I}/#\Lambda^{2} = 0 (TeV^{-2})","l");
-    legend->AddEntry(Histo_2->GetName(), "C_{tW}^{I}/#\Lambda^{2} = -2 (TeV^{-2})","l");
-    legend->AddEntry(Histo_3->GetName(), "C_{tW}^{I}/#\Lambda^{2} = 2 (TeV^{-2})","l");
-  }
-
-  if(EFT == "")
-  {
-    legend->AddEntry(Histo_1->GetName(), legendEntry1.c_str(),"l");
-    legend->AddEntry(Histo_2->GetName(), legendEntry2.c_str(),"l");
-    legend->AddEntry(Histo_3->GetName(), legendEntry3.c_str(),"l");
-  } 
-  //legend->SetLegendSize(0.5);
-
-  legend->Draw("SAME");
-
-  Name += ".pdf";
-  Canvas->Print(Name.c_str());
-}
-
 void Compare_1Histos(TTree* t1, string variable, int nbins, double xmin, double xmax, string selection, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string Name){
 
   TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection, "Histo_1");
   Histo_1->SetStats(kFALSE);
+
+  if(normalization)
+  {
+    double a = Histo_1->Integral();
+    Histo_1->Scale(1/a);
+    Name += "_normalized";
+    legendY += " normalized";
+  }
 
   double max = Histo_1->GetMaximum();
   TCanvas* Canvas = new TCanvas("Canvas","Canvas");
@@ -489,11 +342,11 @@ void Compare_1Histos(TTree* t1, string variable, int nbins, double xmin, double 
    Canvas->Print(Name.c_str());
 }
 
-void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xmin, double xmax, string selection, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string Name){
+void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string Name){
 
   Name += "_" + variable;
-  TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection, "Histo_1");
-  TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection, "Histo_2");
+  TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
+  TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
 
   Histo_1->SetStats(kFALSE);
   Histo_2->SetStats(kFALSE);
@@ -505,8 +358,8 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
     Histo_1->Scale(1/a);
     Histo_2->Scale(1/b);
     Name += "_normalized";
+    legendY += " normalized";
   }
-  //cout<<legendX<<endl;
   double max = (Histo_1->GetMaximum()>Histo_2->GetMaximum()) ? Histo_1->GetMaximum() : Histo_2->GetMaximum();
 
   TCanvas* Canvas = new TCanvas("Canvas","Canvas");
@@ -563,33 +416,118 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
 
 }
 
-void Compare_4Histos(TTree* t1, TTree* t2, TTree* t3, TTree* t4, string variable, int nbins, double xmin, double xmax, string selection, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string legendEntry3, string legendEntry4, string Name){
+void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string selection3, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string legendEntry3, string EFT, string Name){
+  
+  Name += variable;
+  
+  TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
+  TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
+  TH1D* Histo_3 = GetHistoWeight(t3, variable, nbins, xmin, xmax, selection3, "Histo_3");
 
-  TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection, "Histo_1");
-  TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection, "Histo_2");
-  TH1D* Histo_3 = GetHistoWeight(t3, variable, nbins, xmin, xmax, selection, "Histo_3");
-  TH1D* Histo_4 = GetHistoWeight(t4, variable, nbins, xmin, xmax, selection, "Histo_4");
+  Histo_1->SetStats(kFALSE);
+  Histo_2->SetStats(kFALSE);
+  Histo_3->SetStats(kFALSE);
+
+  TCanvas* Canvas = new TCanvas("Canvas","Canvas");
+  Histo_1->SetTitle("");
+
+  if(log_fity) 
+  {
+    Canvas->SetLogy();
+    Name += "_log"; 
+    legendY += " log";
+  }
+  if(normalization) 
+  {
+    Double_t integral1 = 1/Histo_1->Integral();
+    Histo_1->Scale(integral1);
+    
+    Double_t integral2 = 1/Histo_2->Integral();
+    Histo_2->Scale(integral2);
+    
+    Double_t integral3 = 1/Histo_3->Integral();
+    Histo_3->Scale(integral3);
+
+    Name += "_normalized";
+    legendY += " normalized";
+  }
+
+  double max = (Histo_1->GetMaximum()>Histo_2->GetMaximum()) ? Histo_1->GetMaximum() : Histo_2->GetMaximum();
+  Histo_1->SetMaximum(max*1.3 );
+
+  Histo_1->SetXTitle(legendX.c_str());
+  Histo_1->SetYTitle(legendY.c_str());
+  Histo_1->SetLineColor(kRed);
+  Histo_1->SetLineWidth(2);
+  Histo_1->Draw();
+
+  
+  Histo_2->SetLineColor(kBlue);
+  Histo_2->SetLineWidth(2);
+  Histo_2->Draw("SAME");
+
+  
+  Histo_3->SetLineColor(kOrange);
+  Histo_3->SetLineWidth(2);
+  Histo_3->Draw("SAME");
+
+
+ double lx0, ly0, lx1, ly1;
+  if (legendPlace=="legendUpLeft"){
+	 lx0 = 0.2;
+	 ly0 = 0.7;
+	 lx1 = 0.6;
+	 ly1 = 0.95;
+  }
+   if (legendPlace=="legendUpRight"){
+	 lx0 = 0.6;
+	 ly0 = 0.75; //Lower Y
+	 lx1 = 0.99;
+	 ly1 = 0.99; //Upper Y
+  }
+  
+  TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
+  legend->SetFillColor(kWhite);
+  legend->SetTextSize(0.04);
+
+  legend->AddEntry(Histo_1->GetName(), legendEntry1.c_str(),"l");
+  legend->AddEntry(Histo_2->GetName(), legendEntry2.c_str(),"l");
+  legend->AddEntry(Histo_3->GetName(), legendEntry3.c_str(),"l");
+  //legend->SetLegendSize(0.5);
+
+  legend->Draw("SAME");
+
+  Name += ".pdf";
+  Canvas->Print(Name.c_str());
+}
+
+void Compare_4Histos(TTree* t1, TTree* t2, TTree* t3, TTree* t4, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string selection3, string selection4, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string legendEntry3, string legendEntry4, string Name){
+
+  TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
+  TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
+  TH1D* Histo_3 = GetHistoWeight(t3, variable, nbins, xmin, xmax, selection3, "Histo_3");
+  TH1D* Histo_4 = GetHistoWeight(t4, variable, nbins, xmin, xmax, selection4, "Histo_4");
 
   Histo_1->SetStats(kFALSE);
   Histo_2->SetStats(kFALSE);
   Histo_3->SetStats(kFALSE);
   Histo_4->SetStats(kFALSE);
+  if(normalization)
+  {
+    double a = Histo_1->Integral();
+    double b = Histo_2->Integral();
+    double c = Histo_3->Integral();
+    double d = Histo_4->Integral();
 
-  double a = Histo_1->Integral();
-  double b = Histo_2->Integral();
-  double c = Histo_3->Integral();
-  double d = Histo_4->Integral();
+    Histo_1->Scale(1/a);
+    Histo_2->Scale(1/b);
+    Histo_3->Scale(1/c);
+    Histo_4->Scale(1/d);
+    Name += "_normalized";
+    legendY += " normalized";
 
-  Histo_1->Scale(1/a);
-  Histo_2->Scale(1/b);
-  if (c>0) Histo_3->Scale(1/c);
-  Histo_4->Scale(1/d);
-  cout << "a="<<a<<" b="<<b<<" c="<<c<<endl;
-
+  }
   double max = (Histo_1->GetMaximum()>Histo_2->GetMaximum()) ? Histo_1->GetMaximum() : Histo_2->GetMaximum();
-  if (c>0) max = (max>Histo_3->GetMaximum()) ? max : Histo_3->GetMaximum();
-  if (d>0) max = (max>Histo_4->GetMaximum()) ? max : Histo_4->GetMaximum();
-  cout << "max="<<max<<endl;
 
   TCanvas* Canvas = new TCanvas("Canvas","Canvas");
   //Canvas->SetLogx();
@@ -615,11 +553,9 @@ void Compare_4Histos(TTree* t1, TTree* t2, TTree* t3, TTree* t4, string variable
   Histo_2->SetLineWidth(2);
   Histo_2->Draw("SAME");
 
-  if (c>0){
-    Histo_3->SetLineColor(kOrange);
-    Histo_3->SetLineWidth(2);
-    Histo_3->Draw("SAME");
-  }
+  Histo_3->SetLineColor(kOrange);
+  Histo_3->SetLineWidth(2);
+  Histo_3->Draw("SAME");
 
   Histo_4->SetLineColor(kGreen);
   Histo_4->SetLineWidth(2);
@@ -641,21 +577,115 @@ void Compare_4Histos(TTree* t1, TTree* t2, TTree* t3, TTree* t4, string variable
 
   TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
   legend->SetFillColor(kWhite);
-  legend->AddEntry(Histo_1->GetName(), "MadGraph EFT = 0", "l");
-  legend->AddEntry(Histo_2->GetName(), "MadSpin EFT = 0", "l");
-  legend->AddEntry(Histo_3->GetName(), "MadGraph EFT = 2", "l");
-  legend->AddEntry(Histo_4->GetName(), "MadSpin EFT = 2", "l");
+  legend->AddEntry(Histo_1->GetName(), legendEntry1.c_str(), "l");
+  legend->AddEntry(Histo_2->GetName(), legendEntry2.c_str(), "l");
+  legend->AddEntry(Histo_3->GetName(), legendEntry3.c_str(), "l");
+  legend->AddEntry(Histo_4->GetName(), legendEntry4.c_str(), "l");
   legend->Draw("SAME");
 
+  Name += ".pdf";
   Canvas->Print(Name.c_str());
-
-  cout << "Histo1 mean: "<<Histo_1->GetMean()<<endl;
-  cout << "Histo2 mean: "<<Histo_2->GetMean()<<endl;
-  if (c>0) cout << "Histo3 mean: "<<Histo_3->GetMean()<<endl;
-
 }
 
-//New Fcts
+void Compare_5Histos(TTree* t1, TTree* t2, TTree* t3, TTree* t4, TTree* t5, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string selection3,string selection4, string selection5, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string legendEntry3, string legendEntry4, string legendEntry5, string Name)
+{
+  
+  TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
+  TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
+  TH1D* Histo_3 = GetHistoWeight(t3, variable, nbins, xmin, xmax, selection3, "Histo_3");
+  TH1D* Histo_4 = GetHistoWeight(t4, variable, nbins, xmin, xmax, selection4, "Histo_4");
+  TH1D* Histo_5 = GetHistoWeight(t4, variable, nbins, xmin, xmax, selection5, "Histo_5");
+
+
+  Histo_1->SetStats(kFALSE);
+  Histo_2->SetStats(kFALSE);
+  Histo_3->SetStats(kFALSE);
+  Histo_4->SetStats(kFALSE);
+  Histo_5->SetStats(kFALSE);
+
+  if(normalization)
+  {
+    double a = Histo_1->Integral();
+    double b = Histo_2->Integral();
+    double c = Histo_3->Integral();
+    double d = Histo_4->Integral();
+    double e = Histo_5->Integral();
+
+    Histo_1->Scale(1/a);
+    Histo_2->Scale(1/b);
+    Histo_3->Scale(1/c);
+    Histo_4->Scale(1/d);
+    Histo_5->Scale(1/e);
+
+    Name += "_normalized";
+    legendY += " normalized";
+  }
+  double max = (Histo_1->GetMaximum()>Histo_2->GetMaximum()) ? Histo_1->GetMaximum() : Histo_2->GetMaximum();
+
+  TCanvas* Canvas = new TCanvas("Canvas","Canvas");
+  //Canvas->SetLogx();
+  Histo_1->SetTitle("");
+  Histo_1->SetAxisRange(0,max*1.1,"Y");
+  if (legendX == "Top Mass (GeV)")
+    {
+      Histo_1->SetAxisRange(0.0001,max*1.1,"Y");
+      Canvas->SetLogy();
+    }
+  if (legendX == "W Mass (GeV)")
+    {
+      Histo_1->SetAxisRange(0.001,max*1.1,"Y");
+      Canvas->SetLogy();
+    }
+  Histo_1->SetXTitle(legendX.c_str());
+  Histo_1->SetYTitle(legendY.c_str());
+  Histo_1->SetLineColor(kRed);
+  Histo_1->SetLineWidth(2);
+  Histo_1->Draw();
+
+  Histo_2->SetLineColor(kBlue);
+  Histo_2->SetLineWidth(2);
+  Histo_2->Draw("SAME");
+
+  Histo_3->SetLineColor(kOrange);
+  Histo_3->SetLineWidth(2);
+  Histo_3->Draw("SAME");
+
+  Histo_4->SetLineColor(kGreen);
+  Histo_4->SetLineWidth(2);
+  Histo_4->Draw("SAME");
+
+  Histo_5->SetLineColor(kViolet);
+  Histo_5->SetLineWidth(2);
+  Histo_5->Draw("SAME");
+
+  double lx0, ly0, lx1, ly1;
+  if (legendPlace=="legendUpLeft"){
+	 lx0 = 0.2;
+	 ly0 = 0.75;
+	 lx1 = 0.5;
+	 ly1 = 0.95;
+  }
+   if (legendPlace=="legendUpRight"){
+	 lx0 = 0.75;
+	 ly0 = 0.75;
+	 lx1 = 0.99;
+	 ly1 = 0.99;
+  }
+
+  TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
+  legend->SetFillColor(kWhite);
+  legend->AddEntry(Histo_1->GetName(), legendEntry1.c_str(), "l");
+  legend->AddEntry(Histo_2->GetName(), legendEntry2.c_str(), "l");
+  legend->AddEntry(Histo_3->GetName(), legendEntry3.c_str(), "l");
+  legend->AddEntry(Histo_4->GetName(), legendEntry4.c_str(), "l");
+  legend->AddEntry(Histo_5->GetName(), legendEntry5.c_str(), "l");
+  legend->Draw("SAME");
+
+  Name += ".pdf";
+  Canvas->Print(Name.c_str());
+
+
+}
 
 void Ratio_EFT_SM_7pts(TTree* t1, TTree* t2, TTree* t3, TTree* t4, TTree* t5, TTree* t6, TTree* t7, string variable, string EFT, int nbins, double xmin, double xmax, string selection, string legendX, string legendY, string file_name, string lepton)
 {
@@ -882,101 +912,6 @@ void Ratio_EFT_SM_7pts(TTree* t1, TTree* t2, TTree* t3, TTree* t4, TTree* t5, TT
 
 }
 
-void Rwgt_vs(string selection, string variable, TTree* t1, TTree* t2,  int nbins, double xmin, double xmax, string EFT, string W_value, string legendtitle, string legendX, string legendY, string legendPlace, string legendEntry1, string legendEntry2, string Name){
-
-  //Fcts to plot base MC Simulations KV data vs Weighted MC simulation KV Data
-  Name += "_" + variable; 
-
-  TH1D *Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection, "Histo_1");
-  TH1D *Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, "1", "Histo_2");
-
-  Histo_1->SetStats(kFALSE);
-  Histo_2->SetStats(kFALSE);
-
-  
-
- if(normalization)
- {
-   double a = Histo_1->Integral();
-   double b = Histo_2->Integral();
-   Histo_1->Scale(1/a);
-   Histo_2->Scale(1/b);
-
-   Name = Name + "_normalized";
-   legendY = legendY + "normalized";
- }
-
-  double max = (Histo_1->GetMaximum()>Histo_2->GetMaximum()) ? Histo_1->GetMaximum() : Histo_2->GetMaximum();
-  TCanvas* Canvas = new TCanvas("Canvas","Canvas");
-  Histo_1->SetTitle("");
-  Histo_1->SetAxisRange(0,max*1.1,"Y");
-  Histo_1->SetXTitle(legendX.c_str());
-  Histo_1->SetYTitle(legendY.c_str());
-  Histo_1->SetLineColor(kRed);
-  Histo_1->SetLineWidth(2);
-  Histo_1->Draw();
-
-  Histo_2->SetLineColor(kBlue);
-  Histo_2->SetLineWidth(2);
-  Histo_2->Draw("SAME");
-
-
-  double lx0, ly0, lx1, ly1;
-   if (legendPlace=="legendUpLeft"){
- 	 lx0 = 0.2;
- 	 ly0 = 0.71;
- 	 lx1 = 0.5;
- 	 ly1 = 0.95;
-   }
-    if (legendPlace=="legendUpRight"){
- 	 lx0 = 0.75;
- 	 ly0 = 0.75;
- 	 lx1 = 0.99;
- 	 ly1 = 0.99;
-   }
-   
-   if(EFT=="ctwi")
-   {
-     legendEntry1 = "Rwgt C_{tW}^{I} = " + W_value + " TeV^{-2}";
-     legendEntry2 = "C_{tW}^{I} = " + W_value + " TeV^{-2}";
-   }
-   
-   if(EFT=="cbwi")
-   {
-     legendEntry1 = "Rwgt C_{bW}^{I} = " + W_value + " TeV^{-2}";
-     legendEntry2 = "C_{bW}^{I} = " + W_value + " TeV^{-2}";
-   }
-
-    if(EFT == "SM")
-   {
-     legendEntry1 = "Rwgt SM";
-     legendEntry2 = "SM";
-   }
-
-    if(EFT == "other")
-   {
-     legendEntry1 = "Dim6 = 2";
-     legendEntry2 = "Dim6 = 1";
-   }
-
-
-
-   TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
-   legend->SetFillColor(kWhite);
-   legend->AddEntry(Histo_1->GetName(), legendEntry1.c_str(), "l");
-   legend->AddEntry(Histo_2->GetName(), legendEntry2.c_str(), "l");
-   legend->SetTextSize(0.035);
-
-   legend->Draw("SAME");
-
-   cout << "Histo1 Entries: "<<Histo_1->Integral()<<endl;
-   cout << "Histo2 Entries: "<<Histo_2->Integral()<<endl;
-
-   Name = Name + "_" +selection + ".pdf"; 
-
-   Canvas->Print(Name.c_str());
-}
-
 void Compare_9Histos(int nbins, double xmin, double xmax, string selection1, string selection2, string selection3,string selection4, string selection5, string selection6, string selection7, string selection8, string selection9, TTree* t1, TTree* t2, TTree* t3, TTree* t4, TTree* t5, TTree* t6, TTree* t7, TTree* t8, TTree* t9, string variable1, string variable2, string variable3, string variable4, string variable5, string variable6, string variable7, string variable8, string variable9, string legendX, string legendY, string legendPlace, string legendtitle, string Name){
   
   //Fcts to Plot all weights in the same Canvas
@@ -1080,16 +1015,71 @@ void Compare_9Histos(int nbins, double xmin, double xmax, string selection1, str
 int main ()
 {
 
-  string StandalonPath = "/gridgroup/cms/greenberg/Pheno/eft_lhe_analyzer/data/madgraph/CutData/Standalone/";
-  string RwgtPath = "/gridgroup/cms/greenberg/Pheno/eft_lhe_analyzer/data/madgraph/CutData/Rwgted/";
+  string StandalonPath = "data/madgraph/CutData/Standalone/";
+  string RwgtPath = "data/madgraph/CutData/Rwgted/";
+  string Dim6onlyInProduction = "data/madgraph/CutData/Standalone/DIM6=1/"; 
+
   string FileIndex = "output_t_channel_";
 
+  /////////////////Standalone Files/////////////////
   // SM input file
   TTree* SM = FileReader(StandalonPath + FileIndex + "SM.root");
+  // ctw
+  TTree* ctw_m2 = FileReader(StandalonPath + FileIndex + "ctw_m2.root");
+  TTree* ctw_m1 = FileReader(StandalonPath + FileIndex + "ctw_m1.root");
+  TTree* ctw_p1 = FileReader(StandalonPath + FileIndex + "ctw_p1.root");
+  TTree* ctw_p2 = FileReader(StandalonPath + FileIndex + "ctw_p2.root");
+  // ctwi
+  TTree* ctwi_m5 = FileReader(StandalonPath + FileIndex + "ctwi_m5.root");
+  TTree* ctwi_m2 = FileReader(StandalonPath + FileIndex + "ctwi_m2.root");
+  TTree* ctwi_m1 = FileReader(StandalonPath + FileIndex + "ctwi_m1.root");
+  TTree* ctwi_p1 = FileReader(StandalonPath + FileIndex + "ctwi_p1.root");
+  TTree* ctwi_p2 = FileReader(StandalonPath + FileIndex + "ctwi_p2.root");
+  TTree* ctwi_p5 = FileReader(StandalonPath + FileIndex + "ctwi_p5.root");
+  // cbw
+  TTree* cbw_m2 = FileReader(StandalonPath + FileIndex + "cbw_m2.root");
+  TTree* cbw_m1 = FileReader(StandalonPath + FileIndex + "cbw_m1.root");
+  TTree* cbw_p1 = FileReader(StandalonPath + FileIndex + "cbw_p1.root");
+  TTree* cbw_p2 = FileReader(StandalonPath + FileIndex + "cbw_p2.root");
+  // cbwi
+  TTree* cbwi_m5 = FileReader(StandalonPath + FileIndex + "cbwi_m5.root");
+  TTree* cbwi_m2 = FileReader(StandalonPath + FileIndex + "cbwi_m2.root");
+  TTree* cbwi_m1 = FileReader(StandalonPath + FileIndex + "cbwi_m1.root");
+  TTree* cbwi_p1 = FileReader(StandalonPath + FileIndex + "cbwi_p1.root");
+  TTree* cbwi_p2 = FileReader(StandalonPath + FileIndex + "cbwi_p2.root");
+  TTree* cbwi_p5 = FileReader(StandalonPath + FileIndex + "cbwi_p5.root");
+  // cptb
+  TTree* cptb_m10 = FileReader(StandalonPath + FileIndex + "cptb_m10.root");
+  TTree* cptb_m5 = FileReader(StandalonPath + FileIndex + "cptb_m5.root");
+  TTree* cptb_p5 = FileReader(StandalonPath + FileIndex + "cptb_p5.root");
+  TTree* cptb_p10 = FileReader(StandalonPath + FileIndex + "cptb_p10.root");
+  // cptbi
+  TTree* cptbi_m10 = FileReader(StandalonPath + FileIndex + "cptbi_m10.root");
+  TTree* cptbi_m5 = FileReader(StandalonPath + FileIndex + "cptbi_m5.root");
+  TTree* cptbi_p5 = FileReader(StandalonPath + FileIndex + "cptbi_p5.root");
+  TTree* cptbi_p10 = FileReader(StandalonPath + FileIndex + "cptbi_p10.root");
+
+  /////////////////Reweighted Files/////////////////
+  TTree* rwgt_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi = FileReader(RwgtPath + "output_t_channel_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_rwgtATcbwi2p5.root");
+  TTree* rwgt_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_10M = FileReader(RwgtPath + "output_t_channel_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_rwgtATcbwi2p5_10M.root");
+  TTree* rwgt_SM_ctwi_cbwi = FileReader(RwgtPath + "output_t_channel_SM_ctwi_cbwi_rwgtAtcbwi2p5.root");
+
+  /////////////////DIM6 = 1 Files/////////////////
+  TTree* SM_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "SM_1dim6.root");
+  TTree* cbwi_m2_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "cbwi_m2_1dim6.root");
+  TTree* ctwi_m2_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "ctwi_m2_1dim6.root");
+  TTree* ctwi_p2_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "ctwi_p2_1dim6.root");
+
+
+  // Compare_4Histos(cptb_m10, cptb_m5, cptb_p5, cptb_p10, "PhiStar", 40, 0, 2*TMath::Pi(), "1","1", "1", "1", "#phi* [rad]", "", "legendUpRight", "Dim6 [TeV^{2}]", "C_{ptb} = -10", "C_{ptb} = -5", "C_{ptb} = 5", "C_{ptb} = 10", "results/PhiStar/cptb/cptb_m10-cptb_m5-cptb_p5-cptb_p10_");
+  Compare_5Histos(SM, cptb_m10, cptb_m5, cptb_p5, cptb_p10, "PhiStar", 20, 0, 2*TMath::Pi(), "1", "1", "1", "1", "1", "#phi* [rad]", "", "legendUpRight", "Dim6 [TeV^{2}]", "SM", "C_{ptb} = -10", "C_{ptb} = -5", "C_{ptb} = 5", "C_{ptb} = 10", "results/PhiStar/SM_cptb_m10-cptb_m5-cptb_p5-cptb_p10");
   
 
+  // Testing Rwgt
+  Compare_2Histos(ctwi_m2, rwgt, "PhiStar", 20, 0 ,2*TMath::Pi(),"1", "weight_ctwi_m2", "#phi* [rad]", "", "legendUpRight", "Dim6 [TeV^{2}]", "SM", "SM(Reweighted)", "results/PhiStar/testingRwgt/sm");
+
   //////////cbWi Plots//////////
-  Compare_3Histos(SM, SM, SM, "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", "SM", "SM", "SM", "cbwi", "results");
+  //Compare_3Histos(SM, cbwi_p2, cbwi_m2, "PhiStar", 40, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "Dim6 [TeV^{2}]", "SM", "C_{bWI} = 2", "C_{bWI} = -2", "cbwi", "results/PhiStar/");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_mass",20, 164, 180, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbWi_");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
   //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
