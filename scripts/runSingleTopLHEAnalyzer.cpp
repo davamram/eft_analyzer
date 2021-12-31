@@ -14,7 +14,7 @@ using namespace std;
 
 int main()
 {
-  int nSamples = 4;
+  int nSamples = 16;
   int modes = 1;
   string* suffix = new string[nSamples];
   string* prefix = new string[modes];
@@ -27,18 +27,18 @@ suffix[0] = "cbw_m2";
 suffix[1] = "cbw_m1";
 suffix[2] = "cbw_p1";
 suffix[3] = "cbw_p2";
-// suffix[4] = "ctwi_p1";
-// suffix[5] = "ctwi_p2";
-// suffix[6] = "ctwi_n1";
-// suffix[7] = "ctwi_n2";
-// suffix[8] = "SM";
-//suffix[9] = "cbwi_n1";
-//suffix[10] = "cbwi_p1";
-//suffix[11] = "cbwi_p2";
-//suffix[12] = "cbwi_p5";
-//suffix[13] = "ctwi_m1";
-//suffix[14] = "ctwi_m2";
-//suffix[15] = "ctwi_p1";
+suffix[4] = "ctw_p1";
+suffix[5] = "ctw_p2";
+suffix[6] = "ctw_m1";
+suffix[7] = "ctw_m2";
+suffix[8] = "cptb_m10";
+suffix[9] = "cptb_m5";
+suffix[10] = "cptb_p5";
+suffix[11] = "cptb_p10";
+suffix[12] = "cptbi_m10";
+suffix[13] = "cptbi_m5";
+suffix[14] = "cptbi_p5";
+suffix[15] = "cptbi_p10";
 
 
 

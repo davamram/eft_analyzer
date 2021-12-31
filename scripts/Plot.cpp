@@ -344,7 +344,6 @@ void Compare_1Histos(TTree* t1, string variable, int nbins, double xmin, double 
 
 void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string Name){
 
-  Name += "_" + variable;
   TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
   TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
 
@@ -408,11 +407,11 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
   legend->SetTextSize(0.035);
 
 
-  Name += ".pdf";
+  Name += ".png";
   Canvas->Print(Name.c_str());
 
-  cout << "Histo1 mean: "<<Histo_1->GetMean()<<endl;
-  cout << "Histo2 mean: "<<Histo_2->GetMean()<<endl;
+  // cout << "Histo1 mean: "<<Histo_1->GetMean()<<endl;
+  // cout << "Histo2 mean: "<<Histo_2->GetMean()<<endl;
 
 }
 
@@ -681,7 +680,7 @@ void Compare_5Histos(TTree* t1, TTree* t2, TTree* t3, TTree* t4, TTree* t5, stri
   legend->AddEntry(Histo_5->GetName(), legendEntry5.c_str(), "l");
   legend->Draw("SAME");
 
-  Name += ".pdf";
+  Name += ".png";
   Canvas->Print(Name.c_str());
 
 
@@ -1059,10 +1058,13 @@ int main ()
   TTree* cptbi_p5 = FileReader(StandalonPath + FileIndex + "cptbi_p5.root");
   TTree* cptbi_p10 = FileReader(StandalonPath + FileIndex + "cptbi_p10.root");
 
-  /////////////////Reweighted Files/////////////////
-  TTree* rwgt_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi = FileReader(RwgtPath + "output_t_channel_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_rwgtATcbwi2p5.root");
-  TTree* rwgt_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_10M = FileReader(RwgtPath + "output_t_channel_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_rwgtATcbwi2p5_10M.root");
-  TTree* rwgt_SM_ctwi_cbwi = FileReader(RwgtPath + "output_t_channel_SM_ctwi_cbwi_rwgtAtcbwi2p5.root");
+  /////////////////Reweighted Files with STreco Selection/////////////////
+  TTree* rwgt1STreco = FileReader(RwgtPath + "output_t_channel_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_rwgtATcbwi2p5_STreco.root"); //rwgt_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi
+  TTree* rwgt2STreco = FileReader(RwgtPath + "output_t_channel_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_rwgtATcbwi2p5_STreco_10M.root"); //rwgt_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_10M
+
+  /////////////////Reweighted Files with regular selection/////////////////
+  TTree* rwgt1 = FileReader(RwgtPath + "output_t_channel_ctwI_cbwI_cptbI_rwgtATcbwi2p5.root");
+  TTree* rwgtM2 = FileReader(RwgtPath + "output_t_channel_SM_ctwi_cbwi_rwgtAtcbwi2p5.root"); //Used during M2 internship: rwgt_SM_ctwi_cbwi
 
   /////////////////DIM6 = 1 Files/////////////////
   TTree* SM_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "SM_1dim6.root");
@@ -1071,94 +1073,28 @@ int main ()
   TTree* ctwi_p2_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "ctwi_p2_1dim6.root");
 
 
-  // Compare_4Histos(cptb_m10, cptb_m5, cptb_p5, cptb_p10, "PhiStar", 40, 0, 2*TMath::Pi(), "1","1", "1", "1", "#phi* [rad]", "", "legendUpRight", "Dim6 [TeV^{2}]", "C_{ptb} = -10", "C_{ptb} = -5", "C_{ptb} = 5", "C_{ptb} = 10", "results/PhiStar/cptb/cptb_m10-cptb_m5-cptb_p5-cptb_p10_");
-  Compare_5Histos(SM, cptb_m10, cptb_m5, cptb_p5, cptb_p10, "PhiStar", 20, 0, 2*TMath::Pi(), "1", "1", "1", "1", "1", "#phi* [rad]", "", "legendUpRight", "Dim6 [TeV^{2}]", "SM", "C_{ptb} = -10", "C_{ptb} = -5", "C_{ptb} = 5", "C_{ptb} = 10", "results/PhiStar/SM_cptb_m10-cptb_m5-cptb_p5-cptb_p10");
-  
+  string Variables [] = {"PhiStar", "cosThetaStar", "cosTheta", "top_mass", "top_pt", "W_pt", "W_mass", "W_transverse_mass"};
 
-  // Testing Rwgt
-  Compare_2Histos(ctwi_m2, rwgt, "PhiStar", 20, 0 ,2*TMath::Pi(),"1", "weight_ctwi_m2", "#phi* [rad]", "", "legendUpRight", "Dim6 [TeV^{2}]", "SM", "SM(Reweighted)", "results/PhiStar/testingRwgt/sm");
-
-  //////////cbWi Plots//////////
-  //Compare_3Histos(SM, cbwi_p2, cbwi_m2, "PhiStar", 40, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "Dim6 [TeV^{2}]", "SM", "C_{bWI} = 2", "C_{bWI} = -2", "cbwi", "results/PhiStar/");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_mass",20, 164, 180, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbWi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "W_pt", 20, 0, 120, "1", "W Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "lepton_pt", 20, 0, 100, "1", "Lepton Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/cbwi_");
-	//Compare_3Histos(tInput[0], tInput[1], tInput[4], "cosTheta", 20, -1, 1, "1", "cos(#theta)", "", "legendUpLeft", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "cbwi", "results/STreco_selection/cbWi_");
+  // PhiStar
+  // Compare_5Histos(SM,ctwi_m2,ctwi_m2,ctwi_p1,ctwi_p2,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{tW}^{I} = -2","C_{tW}^{I} = -1","C_{tW}^{I} = 1","C_{tW}^{I} = 2","results/Compare_5Histos/PhiStar/SM_vs_ctwi-m2_vs_ctwi-m1_vs_ctwi-p1_vs_ctwi-p2");
+  // Compare_5Histos(SM,cbwi_m2,cbwi_m2,cbwi_p1,cbwi_p2,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{bW}^{I} = -2","C_{bW}^{I} = -1","C_{bW}^{I} = 1","C_{bW}^{I} = 2","results/Compare_5Histos/PhiStar/SM_vs_cbwi-m2_vs_cbwi-m1_vs_cbwi-p1_vs_cbwi-p2");
+  // Compare_5Histos(SM,cbw_m2,cbw_m2,cbw_p1,cbw_p2,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{bW} = -2","C_{bW} = -1","C_{bW} = 1","C_{bW} = 2","results/Compare_5Histos/PhiStar/SM_vs_cbw-m2_vs_cbw-m1_vs_cbw-p1_vs_cbw-p2");
+  // Compare_5Histos(SM,ctw_m2,ctw_m2,ctw_p1,ctw_p2,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{tW} = -2","C_{tW} = -1","C_{tW} = 1","C_{tW} = 2","results/Compare_5Histos/PhiStar/SM_vs_ctw-m2_vs_ctw-m1_vs_ctw-p1_vs_ctw-p2");
+  // Compare_5Histos(SM,cptbi_m10,cptbi_m5,cptbi_p5,cptbi_p10,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb}^{I} = -10","C_{ptb}^{I} = -5","C_{ptb}^{I} = 5","C_{ptb}^{I} = 10","results/Compare_5Histos/PhiStar/SM_vs_cptbi-m10_vs_cptbi-m5_vs_cptbi-p5_vs_cptbi-p10");
+  // Compare_5Histos(SM,cptb_m10,cptb_m5,cptb_p5,cptb_p10,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb} = -10","C_{ptb} = -5","C_{ptb} = 5","C_{ptb} = 10","results/Compare_5Histos/PhiStar/SM_vs_cptb-m10_vs_cptb-m5_vs_cptb-p5_vs_cptb-p10");
 
 
-  //////////ctWi Plots//////////
-  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi* [rad]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[5], StandaloneFiles[8], "ctwi", "results/STreco_selection/ctWi_");
-  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "top_mass",25, 150, 190, "1", "Top Mass [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[5], StandaloneFiles[8], "ctwi", "results/ctWi_");
-  //Compare_3Histos(tInput[0], tInput[5], tInput[8], "cosThetaStar", 20, -1, 1, "1", "cos#theta*", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[5], StandaloneFiles[8], "ctwi", "results/STreco_selection/ctWi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "top_pt", 20, 0, 400, "1", "Top Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "ctwi", "results/ctwi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "W_pt", 20, 0, 120, "1", "W Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "ctwi", "results/ctwi_");
-  //Compare_3Histos(tInput[0], tInput[1], tInput[4], "lepton_pt", 20, 0, 100, "1", "Lepton Pt [GeV]", "", "legendUpRight", "dim6top", StandaloneFiles[0], StandaloneFiles[1], StandaloneFiles[4], "ctwi", "results/ctwi_");
-	//Compare_3Histos(tInput[0], tInput[5], tInput[8], "cosTheta", 20, -1, 1, "1", "cos(#theta)", "", "legendUpLeft", "dim6top", StandaloneFiles[0], StandaloneFiles[5], StandaloneFiles[8], "ctwi", "results/STreco_selection/ctWi_");
+  // cosThetaStar
+  // Compare_5Histos(SM,ctwi_m2,ctwi_m2,ctwi_p1,ctwi_p2,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{tW}^{I} = -2","C_{tW}^{I} = -1","C_{tW}^{I} = 1","C_{tW}^{I} = 2","results/Compare_5Histos/cosThetaStar/SM_vs_ctwi-m2_vs_ctwi-m1_vs_ctwi-p1_vs_ctwi-p2");
+  // Compare_5Histos(SM,cbwi_m2,cbwi_m2,cbwi_p1,cbwi_p2,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{bW}^{I} = -2","C_{bW}^{I} = -1","C_{bW}^{I} = 1","C_{bW}^{I} = 2","results/Compare_5Histos/cosThetaStar/SM_vs_cbwi-m2_vs_cbwi-m1_vs_cbwi-p1_vs_cbwi-p2");
+  // Compare_5Histos(SM,cbw_m2,cbw_m2,cbw_p1,cbw_p2,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{bW} = -2","C_{bW} = -1","C_{bW} = 1","C_{bW} = 2","results/Compare_5Histos/cosThetaStar/SM_vs_cbw-m2_vs_cbw-m1_vs_cbw-p1_vs_cbw-p2");
+  // Compare_5Histos(SM,ctw_m2,ctw_m2,ctw_p1,ctw_p2,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{tW} = -2","C_{tW} = -1","C_{tW} = 1","C_{tW} = 2","results/Compare_5Histos/cosThetaStar/SM_vs_ctw-m2_vs_ctw-m1_vs_ctw-p1_vs_ctw-p2");
+  // Compare_5Histos(SM,cptbi_m10,cptbi_m5,cptbi_p5,cptbi_p10,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb}^{I} = -10","C_{ptb}^{I} = -5","C_{ptb}^{I} = 5","C_{ptb}^{I} = 10","results/Compare_5Histos/cosThetaStar/SM_vs_cptbi-m10_vs_cptbi-m5_vs_cptbi-p5_vs_cptbi-p10");
+  // Compare_5Histos(SM,cptb_m10,cptb_m5,cptb_p5,cptb_p10,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb} = -10","C_{ptb} = -5","C_{ptb} = 5","C_{ptb} = 10","results/Compare_5Histos/cosThetaStar/SM_vs_cptb-m10_vs_cptb-m5_vs_cptb-p5_vs_cptb-p10");
 
 
-  ////////////EFT VS SM////////////
-  //costheta:
-  //Ratio_EFT_SM(tInput[0],tInput[3],tInput[4],tInput[1],tInput[2],"cosTheta","cbwi",5,-1,1,"1","cos#theta","ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_cosTheta.pdf","lepton");
-   
-  //costhetaStar:
-  //Ratio_EFT_SM(tInput[0], tInput[3], tInput[4], tInput[2], tInput[1], "cosThetaStar","cbwi", 5, -1, 1 ,"nature_lepton==1", "cos#theta^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_cosThetaStar.pdf", "elec");
-  //Ratio_EFT_SM(tInput[0], tInput[7], tInput[8], tInput[6], tInput[5], "cosThetaStar","ctwi", 5, -1, 1 ,"nature_lepton==1", "cos#theta^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_ctwi_cosThetaStar.pdf", "elec");
-  //Ratio_EFT_SM_7pts(tInput[0], tInput[3], tInput[4], tInput[1], tInput[2], tInput[10], tInput[9], "cosThetaStar","cbwi", 5, -1, 1 ,"nature_lepton==1", "cos#theta^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_cosThetaStar_pt7.pdf", "elec");
-
-  //PhiStar:
-  //Ratio_EFT_SM(tInput[0], tInput[3], tInput[4], tInput[2], tInput[1], "PhiStar","cbwi", 5, 0, 2*TMath::Pi(),"1", "#phi^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_cbwi_PhiStar.pdf","elec");
-  //Ratio_EFT_SM(tInput[0], tInput[7], tInput[8], tInput[6], tInput[5], "PhiStar","ctwi", 5, 0, 2*TMath::Pi(),"1", "#phi^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_ctwi_PhiStar.pdf","elec");
-  //Ratio_EFT_SM_7pts(tInput[0], tInput[7], tInput[8], tInput[6], tInput[5], tInput[12], tInput[11], "PhiStar","ctwi", 5, 0, 2*TMath::Pi(),"1", "#phi^{*}", "ratio EFT/SM","results/ratio_madgraph/ratio_ctwi_PhiStar.pdf","elec");
-  
-  //Weighted files
-  // Ratio_EFT_SM(tInput[16], tInput[16], tInput[16], tInput[16], tInput[16], "PhiStar", "cbwi", 20, 0, 2*TMath::Pi(), "weight_SM", "weight_cbwi_p1","weight_cbwi_p2", "weight_cbwi_m1", "weight_cbwi_m2",  "C_{bW}^{I}", "EFT/SM", "results/EFT_vs_SM/Rwgt_cbwi2p5_XSect/PhiStar/Rwgt_cbwi2p5_cbwi_PhiStar_20bins.pdf", "elmu");
-  // Ratio_EFT_SM(tInput[16], tInput[16], tInput[16], tInput[16], tInput[16], "cosThetaStar", "cbwi", 20, -1, 1, "weight_SM", "weight_cbwi_p1","weight_cbwi_p2", "weight_cbwi_m1", "weight_cbwi_m2", "C_{bW}^{I}", "EFT/SM", "results/EFT_vs_SM/Rwgt_cbwi2p5_XSect/cosThetaStar/Rwgt_cbwi2p5_cbwi_cosThetaStar_20bins.pdf", "elmu");
-  // Ratio_EFT_SM(tInput[16], tInput[16], tInput[16], tInput[16], tInput[16], "PhiStar", "ctwi", 20, 0, 2*TMath::Pi(), "weight_SM", "weight_ctwi_p1","weight_ctwi_p2", "weight_ctwi_m1", "weight_ctwi_m2", "C_{tW}^{I}", "EFT/SM", "results/EFT_vs_SM/Rwgt_cbwi2p5_XSect/PhiStar/Rwgt_cbwi2p5_ctwi_PhiStar_20bins.pdf", "elmu");
-  // Ratio_EFT_SM(tInput[16], tInput[16], tInput[16], tInput[16], tInput[16], "cosThetaStar", "ctwi", 20, -1, 1, "weight_SM", "weight_ctwi_p1","weight_ctwi_p2", "weight_ctwi_m1", "weight_ctwi_m2", "C_{tW}^{I}", "EFT/SM", "results/EFT_vs_SM/Rwgt_cbwi2p5_XSect/cosThetaStar/Rwgt_cbwi2p5_ctwi_cosThetaStar_20bins.pdf", "elmu");
-
-if(reweight)
-  {
-    /////////////////Change the variables to get the Plot you want/////////////////
-
-    string EFT = "";                 //EFT variable {ctwi, cbwi, SM, other} for legend name
-    int W_value = 2;                   //Wilson coefficient Value for legend
-
-    string weight = "weight_cbwi_p2";   //Cut value {weight_SM ; weight_ctwi_m2(m1,p1,p1) ; weight_cbwi_m2(m1,p1,p2)}
-    
-
-    //Rwgt_vs(weight, "PhiStar", tInput[16], tInput[19], 20, 0, 2*TMath::Pi(), EFT, to_string(W_value), "C_{bw}^{I} = 2", "#phi^{*} [rad]", "", "legendUpRight", "", "", "results/weighted/dim6");
-    //Rwgt_vs(weight, "cosThetaStar", tInput[16], tInput[19], 20, -1, 1, EFT, to_string(W_value), "C_{bw}^{I} = 2", "cos(#theta^{*})", "", "legendUpRight", "", "", "results/weighted/dim6");
-    //Rwgt_vs(weight, "top_mass", tInput[16], tInput[17], 40, 166, 178, EFT, to_string(W_value), "C_{tw}^{I} = -2", "M_{Top} [GeV]", "", "legendUpRight", "", "", "results/weighted/dim6");
-    //Rwgt_vs(weight, "lepton_pt", tInput[16], tInput[17], 40, 0, 60, EFT, to_string(W_value), "C_{tW}^{I} = -2", "Pt_{lepton} [GeV]", "", "legendUpRight", "", "", "results/weighted/dim6");
-    //Rwgt_vs(weight, "top_pt", tInput[16], tInput[17], 0, 20, 300, EFT, to_string(W_value), "C_{tW}^{I} = -2", "Pt_{Top} [GeV]", "", "legendUpRight", "", "", "results/weighted/dim6_zoom");
-    //Rwgt_vs(weight, "W_pt", tInput[16], tInput[17], 40, 0, 100, EFT, to_string(W_value), "C_{tW}^{I} = -2", "Pt_{W} [GeV]", "", "legendUpRight", "", "", "results/weighted/dim6");
-
-
-    //Compare_3Histos(tInput[14], tInput[14], tInput[14], "top_mass", 20, 165, 180, "", "M_{Top} [Gev]", "", "legendUpRight", "dim6top Base C_{tW}^{I} = 2.5 [TeV^{-2}]", "C_{tW}^{I} = -2 TeV^{-2}", "C_{tW}^{I} = 2 TeV^{-2}", "SM", "", "results/weighted/Rwgt_ctwi2p5_");
-    //Compare_3Histos(tInput[15], tInput[15], tInput[15], "top_mass", 20, 165, 180, "", "M_{Top} [Gev]", "", "legendUpRight", "dim6top Base C_{bW}^{I} = 2.5 [TeV^{-2}]", "C_{tW}^{I} = -2 TeV^{-2}", "C_{tW}^{I} = 2 TeV^{-2}", "SM", "", "results/weighted/Rwgt_cbwi2p5_");
-  }
-
-  //////////Compare Weights//////////
-  //base ctwi = 2.5
-  //Compare_9Histos(100,0,0.02,"1","1","1","1","1","1","1","1","1", tInput[14],tInput[14],tInput[14],tInput[14],tInput[14],tInput[14],tInput[14],tInput[14],tInput[14],"weight_SM","weight_cbwi_m2","weight_cbwi_m1","weight_cbwi_p1","weight_cbwi_p2","weight_ctwi_m2","weight_ctwi_m1","weight_ctwi_p1","weight_ctwi_p2","C_{tW}^{I} = 2.5","","legendUpRight","dim6top EFT value [TeV^{-2}]","results/weighted/weights_EFT_ctwi2p5");
-  //base ctwi = 3
-  //Compare_9Histos(100,0,0.04,"1","1","1","1","1","1","1","1","1", tInput[13],tInput[13],tInput[13],tInput[13],tInput[13],tInput[13],tInput[13],tInput[13],tInput[13],"weight_SM","weight_cbwi_m2","weight_cbwi_m1","weight_cbwi_p1","weight_cbwi_p2","weight_ctwi_m2","weight_ctwi_m1","weight_ctwi_p1","weight_ctwi_p2","C_{tW}^{I} = 3","","legendUpRight","dim6top EFT value [TeV^{-2}]","results/weighted/weights_EFT_ctwi_p3");
-  //base cbwi = 2.5
-  //Compare_9Histos(100,0,0.02,"1","1","1","1","1","1","1","1","1", tInput[16],tInput[16],tInput[16],tInput[16],tInput[16],tInput[16],tInput[16],tInput[16],tInput[16],"weight_SM","weight_cbwi_m2","weight_cbwi_m1","weight_cbwi_p1","weight_cbwi_p2","weight_ctwi_m2","weight_ctwi_m1","weight_ctwi_p1","weight_ctwi_p2","C_{bW}^{I} = 2.5","","legendUpRight","dim6top EFT value [TeV^{-2}]","results/weighted/weights_EFT_cbwi2p5");
-  //base cbwi = 3
-  //Compare_9Histos(100,0,0.02,"1","1","1","1","1","1","1","1","1", tInput[15],tInput[15],tInput[15],tInput[15],tInput[15],tInput[15],tInput[15],tInput[15],tInput[15],"weight_SM","weight_cbwi_m2","weight_cbwi_m1","weight_cbwi_p1","weight_cbwi_p2","weight_ctwi_m2","weight_ctwi_m1","weight_ctwi_p1","weight_ctwi_p2","C_{bW}^{I} = 3","","legendUpRight","dim6top EFT value [TeV^{-2}]","results/weighted/weights_EFT_cbwi_p3");
-
-  /////Made to compare Dim6=1 vs Dim6=2/////C_{tW}^{I} = -2
-  //Compare_2Histos(tInput[1], tInput[20], "cosTheta", 20, -1, 1, "1", "cos(#theta)", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = 2", "Dim6 = 1", "results/dim6_cbwi_m2");
-  //Compare_2Histos(tInput[1], tInput[20], "cosThetaStar", 20, -1, 1, "1", "cos(#theta^{*})", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = 2", "Dim6 = 1", "results/dim6_cbwi_m2");
-  //Compare_2Histos(tInput[1], tInput[20], "PhiStar", 20, 0, 2*TMath::Pi(), "1", "#phi^{*}", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = 2", "Dim6 = 1", "results/dim6_cbwi_m2");
-  //Compare_2Histos(tInput[1], tInput[20], "top_pt", 20, 0, 300, "1", "Pt_{top} [GeV]", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = 2", "Dim6 = 1", "results/dim6_cbwi_m2");
-  //Compare_2Histos(tInput[1], tInput[20], "top_mass", 20, 166, 178, "1", "M_{top} [GeV]", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = 2", "Dim6 = 1", "results/dim6_cbwi_m2");
-  //Compare_2Histos(tInput[1], tInput[20], "lepton_pt", 20, 0, 60, "1", "Pt_{lepton} [GeV]", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = 2", "Dim6 = 1", "results/dim6_cbwi_m2"); 
-  //Compare_2Histos(tInput[1], tInput[20], "W_pt", 20, 0, 100, "1", "Pt_{W} [GeV]", "normalized", "legendUpRight", "C_{bW}^{I} = -2", "Dim6 = -2", "Dim6 = 1", "results/dim6_cbwi_m2");
-
+  // Comparing Rwgt
+  Compare_2Histos(ctw_m2,rwgt1,Variables[0],20,0,2*TMath::Pi(),"1","weight_ctw_m2","#phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","C_{tW} = -2","C_{tW} = -2 (rwgt)","results/Compare_2Histos/testingRwgt/PhiStar/ctw-m2_rwgt1");
 
   return 0;
 }
