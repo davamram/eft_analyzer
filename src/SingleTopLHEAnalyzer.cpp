@@ -58,6 +58,15 @@ void SingleTopLHEAnalyzer::Loop()
    float weight_ctwi_m2, weight_ctwi_m1, weight_ctwi_p1, weight_ctwi_p2;
    float weight_cbw_m2, weight_cbw_m1, weight_cbw_p1, weight_cbw_p2;
    float weight_cbwi_m2, weight_cbwi_m1, weight_cbwi_p1, weight_cbwi_p2;
+  //  Ctwi = -2 -> cbwi = {-2,-1,1,2}
+   float weight_ctwi_m2_cbwi_m2, weight_ctwi_m2_cbwi_m1, weight_ctwi_m2_cbwi_p1, weight_ctwi_m2_cbwi_p2;
+  //  Ctwi = -1 -> cbwi = {-2,-1,1,2}
+   float weight_ctwi_m1_cbwi_m2, weight_ctwi_m1_cbwi_m1, weight_ctwi_m1_cbwi_p1, weight_ctwi_m1_cbwi_p2;
+  // Ctwi = 1 -> cbwi = {-2,-2,1,2}
+   float weight_ctwi_p1_cbwi_m2, weight_ctwi_p1_cbwi_m1, weight_ctwi_p1_cbwi_p1, weight_ctwi_p1_cbwi_p2;
+  // Ctwi = 2 -> cbwi = {-2,-1,1,2}
+   float weight_ctwi_p2_cbwi_m2, weight_ctwi_p2_cbwi_m1, weight_ctwi_p2_cbwi_p1, weight_ctwi_p2_cbwi_p2;
+
    double weight_sum[9];
 
    TFile* fOutput = new TFile("output.root","RECREATE");
@@ -111,6 +120,26 @@ void SingleTopLHEAnalyzer::Loop()
    tOutput->Branch("weight_cbwi_m1",&weight_cbwi_m1,"weight_cbwi_m1/F");
    tOutput->Branch("weight_cbwi_p1",&weight_cbwi_p1,"weight_cbwi_p1/F");
    tOutput->Branch("weight_cbwi_p2",&weight_cbwi_p2,"weight_cbwi_p2/F");
+
+   tOutput->Branch("weight_ctwi_m2_cbwi_m2",&weight_ctwi_m2_cbwi_m2,"weight_ctwi_m2_cbwi_m2/F");
+   tOutput->Branch("weight_ctwi_m2_cbwi_m1",&weight_ctwi_m2_cbwi_m1,"weight_ctwi_m2_cbwi_m1/F");
+   tOutput->Branch("weight_ctwi_m2_cbwi_p1",&weight_ctwi_m2_cbwi_p1,"weight_ctwi_m2_cbwi_p1/F");
+   tOutput->Branch("weight_ctwi_m2_cbwi_p2",&weight_ctwi_m2_cbwi_p2,"weight_ctwi_m2_cbwi_p2/F");
+
+   tOutput->Branch("weight_ctwi_m1_cbwi_m2",&weight_ctwi_m1_cbwi_m2,"weight_ctwi_m1_cbwi_m2/F");
+   tOutput->Branch("weight_ctwi_m1_cbwi_m1",&weight_ctwi_m1_cbwi_m1,"weight_ctwi_m1_cbwi_m1/F");
+   tOutput->Branch("weight_ctwi_m1_cbwi_p1",&weight_ctwi_m1_cbwi_p1,"weight_ctwi_m1_cbwi_p1/F");
+   tOutput->Branch("weight_ctwi_m1_cbwi_p2",&weight_ctwi_m1_cbwi_p2,"weight_ctwi_m1_cbwi_p2/F");
+
+   tOutput->Branch("weight_ctwi_p1_cbwi_m2",&weight_ctwi_p1_cbwi_m2,"weight_ctwi_p1_cbwi_m2/F");
+   tOutput->Branch("weight_ctwi_p1_cbwi_m1",&weight_ctwi_p1_cbwi_m1,"weight_ctwi_p1_cbwi_m1/F");
+   tOutput->Branch("weight_ctwi_p1_cbwi_p1",&weight_ctwi_p1_cbwi_p1,"weight_ctwi_p1_cbwi_p1/F");
+   tOutput->Branch("weight_ctwi_p1_cbwi_p2",&weight_ctwi_p1_cbwi_p2,"weight_ctwi_p1_cbwi_p2/F");
+
+   tOutput->Branch("weight_ctwi_p2_cbwi_m2",&weight_ctwi_p2_cbwi_m2,"weight_ctwi_p2_cbwi_m2/F");
+   tOutput->Branch("weight_ctwi_p2_cbwi_m1",&weight_ctwi_p2_cbwi_m1,"weight_ctwi_p2_cbwi_m1/F");
+   tOutput->Branch("weight_ctwi_p2_cbwi_p1",&weight_ctwi_p2_cbwi_p1,"weight_ctwi_p2_cbwi_p1/F");
+   tOutput->Branch("weight_ctwi_p2_cbwi_p2",&weight_ctwi_p2_cbwi_p2,"weight_ctwi_p2_cbwi_p2/F");
 
 
    if (fChain == 0) return;
@@ -171,6 +200,26 @@ void SingleTopLHEAnalyzer::Loop()
          weight_cbwi_m1 = Rwgt_Weight[22];
          weight_cbwi_p1 = Rwgt_Weight[23];
          weight_cbwi_p2 = Rwgt_Weight[24];
+        //  OffGrid ctwi/cbwi
+        weight_ctwi_m2_cbwi_m2 = Rwgt_Weight[25];
+        weight_ctwi_m2_cbwi_m1 = Rwgt_Weight[26];
+        weight_ctwi_m2_cbwi_p1 = Rwgt_Weight[27];
+        weight_ctwi_m2_cbwi_p2 = Rwgt_Weight[28];
+
+        weight_ctwi_m1_cbwi_m2 = Rwgt_Weight[29];
+        weight_ctwi_m1_cbwi_m1 = Rwgt_Weight[30];
+        weight_ctwi_m1_cbwi_p1 = Rwgt_Weight[31];
+        weight_ctwi_m1_cbwi_p2 = Rwgt_Weight[32];
+
+        weight_ctwi_p1_cbwi_m2 = Rwgt_Weight[33];
+        weight_ctwi_p1_cbwi_m1 = Rwgt_Weight[34];
+        weight_ctwi_p1_cbwi_p1 = Rwgt_Weight[35];
+        weight_ctwi_p1_cbwi_p2 = Rwgt_Weight[36];
+
+        weight_ctwi_p2_cbwi_m2 = Rwgt_Weight[37];
+        weight_ctwi_p2_cbwi_m1 = Rwgt_Weight[38];
+        weight_ctwi_p2_cbwi_p1 = Rwgt_Weight[39];
+        weight_ctwi_p2_cbwi_p2 = Rwgt_Weight[40];
 
       }
 
