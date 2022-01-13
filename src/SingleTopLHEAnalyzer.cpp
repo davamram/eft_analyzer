@@ -58,6 +58,15 @@ void SingleTopLHEAnalyzer::Loop()
    float weight_ctwi_m2, weight_ctwi_m1, weight_ctwi_p1, weight_ctwi_p2;
    float weight_cbw_m2, weight_cbw_m1, weight_cbw_p1, weight_cbw_p2;
    float weight_cbwi_m2, weight_cbwi_m1, weight_cbwi_p1, weight_cbwi_p2;
+  //  Ctwi = -2 -> cbwi = {-2,-1,1,2}
+   float weight_ctwi_m2_cbwi_m2, weight_ctwi_m2_cbwi_m1, weight_ctwi_m2_cbwi_p1, weight_ctwi_m2_cbwi_p2;
+  //  Ctwi = -1 -> cbwi = {-2,-1,1,2}
+   float weight_ctwi_m1_cbwi_m2, weight_ctwi_m1_cbwi_m1, weight_ctwi_m1_cbwi_p1, weight_ctwi_m1_cbwi_p2;
+  // Ctwi = 1 -> cbwi = {-2,-2,1,2}
+   float weight_ctwi_p1_cbwi_m2, weight_ctwi_p1_cbwi_m1, weight_ctwi_p1_cbwi_p1, weight_ctwi_p1_cbwi_p2;
+  // Ctwi = 2 -> cbwi = {-2,-1,1,2}
+   float weight_ctwi_p2_cbwi_m2, weight_ctwi_p2_cbwi_m1, weight_ctwi_p2_cbwi_p1, weight_ctwi_p2_cbwi_p2;
+
    double weight_sum[9];
 
    TFile* fOutput = new TFile("output.root","RECREATE");
@@ -111,6 +120,26 @@ void SingleTopLHEAnalyzer::Loop()
    tOutput->Branch("weight_cbwi_m1",&weight_cbwi_m1,"weight_cbwi_m1/F");
    tOutput->Branch("weight_cbwi_p1",&weight_cbwi_p1,"weight_cbwi_p1/F");
    tOutput->Branch("weight_cbwi_p2",&weight_cbwi_p2,"weight_cbwi_p2/F");
+
+   tOutput->Branch("weight_ctwi_m2_cbwi_m2",&weight_ctwi_m2_cbwi_m2,"weight_ctwi_m2_cbwi_m2/F");
+   tOutput->Branch("weight_ctwi_m2_cbwi_m1",&weight_ctwi_m2_cbwi_m1,"weight_ctwi_m2_cbwi_m1/F");
+   tOutput->Branch("weight_ctwi_m2_cbwi_p1",&weight_ctwi_m2_cbwi_p1,"weight_ctwi_m2_cbwi_p1/F");
+   tOutput->Branch("weight_ctwi_m2_cbwi_p2",&weight_ctwi_m2_cbwi_p2,"weight_ctwi_m2_cbwi_p2/F");
+
+   tOutput->Branch("weight_ctwi_m1_cbwi_m2",&weight_ctwi_m1_cbwi_m2,"weight_ctwi_m1_cbwi_m2/F");
+   tOutput->Branch("weight_ctwi_m1_cbwi_m1",&weight_ctwi_m1_cbwi_m1,"weight_ctwi_m1_cbwi_m1/F");
+   tOutput->Branch("weight_ctwi_m1_cbwi_p1",&weight_ctwi_m1_cbwi_p1,"weight_ctwi_m1_cbwi_p1/F");
+   tOutput->Branch("weight_ctwi_m1_cbwi_p2",&weight_ctwi_m1_cbwi_p2,"weight_ctwi_m1_cbwi_p2/F");
+
+   tOutput->Branch("weight_ctwi_p1_cbwi_m2",&weight_ctwi_p1_cbwi_m2,"weight_ctwi_p1_cbwi_m2/F");
+   tOutput->Branch("weight_ctwi_p1_cbwi_m1",&weight_ctwi_p1_cbwi_m1,"weight_ctwi_p1_cbwi_m1/F");
+   tOutput->Branch("weight_ctwi_p1_cbwi_p1",&weight_ctwi_p1_cbwi_p1,"weight_ctwi_p1_cbwi_p1/F");
+   tOutput->Branch("weight_ctwi_p1_cbwi_p2",&weight_ctwi_p1_cbwi_p2,"weight_ctwi_p1_cbwi_p2/F");
+
+   tOutput->Branch("weight_ctwi_p2_cbwi_m2",&weight_ctwi_p2_cbwi_m2,"weight_ctwi_p2_cbwi_m2/F");
+   tOutput->Branch("weight_ctwi_p2_cbwi_m1",&weight_ctwi_p2_cbwi_m1,"weight_ctwi_p2_cbwi_m1/F");
+   tOutput->Branch("weight_ctwi_p2_cbwi_p1",&weight_ctwi_p2_cbwi_p1,"weight_ctwi_p2_cbwi_p1/F");
+   tOutput->Branch("weight_ctwi_p2_cbwi_p2",&weight_ctwi_p2_cbwi_p2,"weight_ctwi_p2_cbwi_p2/F");
 
 
    if (fChain == 0) return;
@@ -171,6 +200,26 @@ void SingleTopLHEAnalyzer::Loop()
          weight_cbwi_m1 = Rwgt_Weight[22];
          weight_cbwi_p1 = Rwgt_Weight[23];
          weight_cbwi_p2 = Rwgt_Weight[24];
+        //  OffGrid ctwi/cbwi
+        weight_ctwi_m2_cbwi_m2 = Rwgt_Weight[25];
+        weight_ctwi_m2_cbwi_m1 = Rwgt_Weight[26];
+        weight_ctwi_m2_cbwi_p1 = Rwgt_Weight[27];
+        weight_ctwi_m2_cbwi_p2 = Rwgt_Weight[28];
+
+        weight_ctwi_m1_cbwi_m2 = Rwgt_Weight[29];
+        weight_ctwi_m1_cbwi_m1 = Rwgt_Weight[30];
+        weight_ctwi_m1_cbwi_p1 = Rwgt_Weight[31];
+        weight_ctwi_m1_cbwi_p2 = Rwgt_Weight[32];
+
+        weight_ctwi_p1_cbwi_m2 = Rwgt_Weight[33];
+        weight_ctwi_p1_cbwi_m1 = Rwgt_Weight[34];
+        weight_ctwi_p1_cbwi_p1 = Rwgt_Weight[35];
+        weight_ctwi_p1_cbwi_p2 = Rwgt_Weight[36];
+
+        weight_ctwi_p2_cbwi_m2 = Rwgt_Weight[37];
+        weight_ctwi_p2_cbwi_m1 = Rwgt_Weight[38];
+        weight_ctwi_p2_cbwi_p1 = Rwgt_Weight[39];
+        weight_ctwi_p2_cbwi_p2 = Rwgt_Weight[40];
 
       }
 
@@ -208,24 +257,21 @@ void SingleTopLHEAnalyzer::Loop()
 	  weight = Event_Weight[jentry];
 
 	  /* SELECTION */
-
-  	//if ((Pl.Pt()<35 || TMath::Abs(Pl.Eta())>1.479) && Pl_ID==11) continue; //Electron
-
-  	if ((Pl.Pt()<32 || (TMath::Abs(Pl.Eta()) > 1.4442 && TMath::Abs(Pl.Eta()) < 1.5660)) && Pl_ID==11) continue; //Electron Streco Selection
-
-    //if ((Pl.Pt()<26 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon
-
-    if ((Pl.Pt()<30 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon Streco Selection [Pt(2016 and 2018: 26Gev ; 2017: 30Gev)]
-
+    // M2 selection
+  	if ((Pl.Pt()<35 || TMath::Abs(Pl.Eta())>1.479) && Pl_ID==11) continue; //Electron
+    if ((Pl.Pt()<26 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon
 	  if (Pqspec.Pt()<40 || TMath::Abs(Pqspec.Eta())>4.7) continue; //Jet 1st selection
+    if (abs(Pqspec.Eta()) < 3.0 && 2.7 < abs(Pqspec.Eta()) && Pqspec.Pt() < 60) continue; //Jet 2nd selection
+	  if (Pb.Pt()<40 || TMath::Abs(Pb.Eta())>2.4) continue;
 
-    //if (abs(Pqspec.Eta()) < 3.0 && 2.7 < abs(Pqspec.Eta()) && Pqspec.Pt() < 60) continue; //Jet 2nd selection
 
-    if (TMath::Abs(Pqspec.Eta()) >= 2.4 && Pqspec.Pt() < 60) continue; //Jet Streco 2nd selection for |eta|>=2.4
-
-	  //if (Pb.Pt()<40 || TMath::Abs(Pb.Eta())>2.4) continue;
-
-	  if (Pb.Pt()<40 || TMath::Abs(Pb.Eta())>2.5) continue; //Streco Selection [Eta for 2016 >2.4 and for 2017/2018 >2.5]
+    // STreco selection
+  	// if ((Pl.Pt()<32 || (TMath::Abs(Pl.Eta()) > 1.4442 && TMath::Abs(Pl.Eta()) < 1.5660)) && Pl_ID==11) continue; //Electron Streco Selection
+    // if ((Pl.Pt()<30 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon Streco Selection [Pt(2016 and 2018: 26Gev ; 2017: 30Gev)]
+    // if (Pqspec.Pt()<40 || TMath::Abs(Pqspec.Eta())>4.7) continue; //Jet 1st selection
+    // if (TMath::Abs(Pqspec.Eta()) >= 2.4 && Pqspec.Pt() < 60) continue; //Jet Streco 2nd selection for |eta|>=2.4
+	  // if (Pb.Pt()<40 || TMath::Abs(Pb.Eta())>2.5) continue; //Streco Selection [Eta for 2016 >2.4 and for 2017/2018 >2.5]
+    
 
 	  /* ANGLE RECONSTRUCTION */
 
