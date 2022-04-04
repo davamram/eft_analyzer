@@ -36,7 +36,7 @@ suffix[0] ="";
       cout<<"Cooking "+prefix[j] + suffix[i]+".root"<<endl;
 
      ///////////////////////////Choose Input Path files//////////////////////////////////////
-     string inputPath = "";
+     string inputPath = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/nonCooked/t_channel_EFT_atLO_nomadspin_reweight_729_5M/";
      string inputName = inputPath + prefix[j] + suffix[i] + ".root";
       
       
@@ -47,7 +47,7 @@ suffix[0] ="";
      singleTopLHEAnalyzer[i]->Loop();
       
      ///////////////////////////Choose Output Path files//////////////////////////////////////
-     string outputPath = "";
+     string outputPath = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/cookedFiles/";
      string commandline = "mv output.root " + outputPath + outputName;
 
      system(commandline.c_str());
