@@ -29,66 +29,16 @@ def BranchNamer(Wname,Wvalue):
 
 reweightCard = open("reweight_crad.dat","w+")
 
+floatsCard = open("float_crad.txt","w+")
+branchCard = open("branch_card.txt","w+")
+weightCard = open("weight_Card.txt","w+")
+
+
 reweightCard.write("#****************************************************************** \n")
 reweightCard.write("#                       Reweight Module                           * \n")
 reweightCard.write("#****************************************************************** \n \n")
 reweightCard.write("change rwgt_dir rwgt \n \n")
 
-###################### Only in Grid Points ######################
-
-# for i in range(-10,11,5):
-#     if i==0: continue
-#     minusplus = "p"
-#     value = str(i)
-#     if i<0: minusplus = "m"
-#     if len(str(i)) > 1: value = str(i).removeprefix("-")
-#     name = "cptb_" + minusplus + value
-#     BranchWritter(name,str(i),"0","0","0","0","0")
-
-# for i in range(-10,11,5):
-#     if i==0: continue
-#     minusplus = "p"
-#     value = str(i)
-#     if i<0: minusplus = "m"
-#     if len(str(i)) > 1: value = str(i).removeprefix("-")
-#     name = "cptbi_" + minusplus + value
-#     BranchWritter(name,"0",str(i),"0","0","0","0")
-
-# for i in range(-5,6,1):
-#     if (i==0 or i==-4 or i==-3 or i==3 or i==4): continue
-#     minusplus = "p"
-#     value = str(i)
-#     if i<0: minusplus = "m"
-#     if len(str(i)) > 1: value = str(i).removeprefix("-")
-#     name = "ctwi_" + minusplus + value
-#     BranchWritter(name,"0","0","0",str(i),"0","0")
-
-# for i in range(-2,3,1):
-#     if i==0: continue
-#     minusplus = "p"
-#     value = str(i)
-#     if i<0: minusplus = "m"
-#     if len(str(i)) > 1: value = str(i).removeprefix("-")
-#     name = "ctw_" + minusplus + value
-#     BranchWritter(name,"0","0",str(i),"0","0","0")
-
-# for i in range(-5,6,1):
-#     if (i==0 or i==-4 or i==-3 or i==3 or i==4): continue
-#     minusplus = "p"
-#     value = str(i)
-#     if i<0: minusplus = "m"
-#     if len(str(i)) > 1: value = str(i).removeprefix("-")
-#     name = "cbwi_" + minusplus + value
-#     BranchWritter(name,"0","0","0","0","0",str(i))
-
-# for i in range(-2,3,1):
-#     if i==0: continue
-#     minusplus = "p"
-#     value = str(i)
-#     if i<0: minusplus = "m"
-#     if len(str(i)) > 1: value = str(i).removeprefix("-")
-#     name = "cbw_" + minusplus + value
-#     BranchWritter(name,"0","0","0","0",str(i),"0")
 
 ###################### Whole Grid Points ######################
 # In this part, we create the points in the parameter space   #
@@ -101,8 +51,8 @@ reweightCard.write("change rwgt_dir rwgt \n \n")
 
 
 count = 0
-cuts1 = [-4,-3,-1,1,3,4] #Cuts on values of ctw, ctwi, cbw, cbwi
-cuts2 = [] #Cuts on values of cptb and cptbi
+cuts1 = [-4,-3,-2,-1,1,2,3,4] #Cuts on values of ctw, ctwi, cbw, cbwi
+cuts2 = [-10,10] #Cuts on values of cptb and cptbi
 listOfProcesses = []
 
 for cptb in range(-10,11,5):
@@ -155,6 +105,10 @@ for cptb in range(-10,11,5):
                         
                         reweightCard.write("#Process nb = " + str(count+1) + "\n")
 
+                        floatsCard.write("float weight_" + process + ";" + "\n")
+                        branchCard.write("tOutput->Branch(\"weight_" + process + "\",&weight_" + process + ",\"weight_" + process +"/F\");" + "\n")
+                        weightCard.write("weight_" + process + " = Rwgt_Weight[" + str(count) + "];" + "\n")
+
                         BranchWritter(process,cptb,cptbi,ctw,ctwi,cbw,cbwi)
 
                         count += 1
@@ -180,6 +134,9 @@ print("Number of Processes = ", count)
 #     switch = input("Do you want to add a new branch? [yes/no]")
 
 reweightCard.close()
+floatsCard.close()
+branchCard.close()
+weightCard.close()
 
             
 
