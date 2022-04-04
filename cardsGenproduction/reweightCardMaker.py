@@ -12,12 +12,12 @@ args = parser.parse_args()
 
 def BranchWritter(name,cptb,cptbi,ctw,ctwi,cbw,cbwi):
     reweightCard.write("launch --rwgt_name="+ name +"\n")
-    reweightCard.write("set DIM6 8 " + str(cptb) + " #cptb" "\n")
-    reweightCard.write("set DIM6 9 " + str(cptbi) + " #cptbi" "\n")
-    reweightCard.write("set DIM6 10 " + str(ctw) + " #ctw" "\n")
-    reweightCard.write("set DIM6 12 " + str(ctwi) + " #ctwi" "\n")
-    reweightCard.write("set DIM6 14 " + str(cbw) + " #cbw" "\n")
-    reweightCard.write("set DIM6 15 " + str(cbwi) + " #cbwi" "\n")
+    reweightCard.write("set DIM6 8 " + str(cptb) + "\n")
+    reweightCard.write("set DIM6 9 " + str(cptbi) + "\n")
+    reweightCard.write("set DIM6 10 " + str(ctw) + "\n")
+    reweightCard.write("set DIM6 12 " + str(ctwi) + "\n")
+    reweightCard.write("set DIM6 14 " + str(cbw) + "\n")
+    reweightCard.write("set DIM6 15 " + str(cbwi) + "\n")
     reweightCard.write("set decay 6 auto \n \n")
 
 def BranchNamer(Wname,Wvalue):
@@ -91,12 +91,18 @@ reweightCard.write("change rwgt_dir rwgt \n \n")
 #     BranchWritter(name,"0","0","0","0",str(i),"0")
 
 ###################### Whole Grid Points ######################
+# In this part, we create the points in the parameter space   #
+#  for ctw, ctwi, cbw, cbwi = {-5,-4,-3,-2,-1,0,1,2,3,4,5}    #
+#         for cptb and cptbi = {-10,-5,0,5,10}                #
+#      and taking acount of the cuts defined below            #
+###############################################################
 
-separator = "\n##############################################################\n############################################################## \n \n"
-step = 640
+
+
+
 count = 0
-cuts1 = [-5,-4,-3,0,3,4,5]
-cuts2 = [-10,-5,5,10]
+cuts1 = [-4,-3,-1,1,3,4] #Cuts on values of ctw, ctwi, cbw, cbwi
+cuts2 = [] #Cuts on values of cptb and cptbi
 listOfProcesses = []
 
 for cptb in range(-10,11,5):
@@ -110,6 +116,7 @@ for cptb in range(-10,11,5):
         if cptbi in cuts2:
             name_cptbi = ""
             cptbi = 0
+            continue
         name_cptbi = BranchNamer("cptbi",cptbi)
 
         for ctw in range(-5,6,1):
@@ -141,10 +148,13 @@ for cptb in range(-10,11,5):
                         name_cbwi = BranchNamer("cbwi",cbwi)
 
                         process = (name_cptb + name_cptbi + name_ctw + name_ctwi + name_cbw + name_cbwi).removeprefix("_")
-                        if process == "": process = "SM"
-                        if count%step == 0: #when count = n*step -> count%step = 0
-                            reweightCard.write(separator)
-                            reweightCard.write("#Number of precesses written: " + str(count) + "\n \n")
+
+                        if process == "":
+                            process = "SM"
+                            ctwi = "1e-10"
+                        
+                        reweightCard.write("#Process nb = " + str(count+1) + "\n")
+
                         BranchWritter(process,cptb,cptbi,ctw,ctwi,cbw,cbwi)
 
                         count += 1
@@ -169,7 +179,7 @@ print("Number of Processes = ", count)
 #     reweightCard.write("set decay 6 auto \n \n")
 #     switch = input("Do you want to add a new branch? [yes/no]")
 
-# reweightCard.close()
+reweightCard.close()
 
             
 
