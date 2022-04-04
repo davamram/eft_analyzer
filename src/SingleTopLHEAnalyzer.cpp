@@ -140,19 +140,19 @@ void SingleTopLHEAnalyzer::Loop()
 
 	  /* SELECTIONS */
     // M2 selection
-  	if ((Pl.Pt()<35 || TMath::Abs(Pl.Eta())>1.479) && Pl_ID==11) continue; //Electron
-    if ((Pl.Pt()<26 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon
-	  if (Pqspec.Pt()<40 || TMath::Abs(Pqspec.Eta())>4.7) continue; //Jet 1st selection
-    if (abs(Pqspec.Eta()) < 3.0 && 2.7 < abs(Pqspec.Eta()) && Pqspec.Pt() < 60) continue; //Jet 2nd selection
-	  if (Pb.Pt()<40 || TMath::Abs(Pb.Eta())>2.4) continue;
+  	// if ((Pl.Pt()<35 || TMath::Abs(Pl.Eta())>1.479) && Pl_ID==11) continue; //Electron
+    // if ((Pl.Pt()<26 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon
+	  // if (Pqspec.Pt()<40 || TMath::Abs(Pqspec.Eta())>4.7) continue; //Jet 1st selection
+    // if (abs(Pqspec.Eta()) < 3.0 && 2.7 < abs(Pqspec.Eta()) && Pqspec.Pt() < 60) continue; //Jet 2nd selection
+	  // if (Pb.Pt()<40 || TMath::Abs(Pb.Eta())>2.4) continue;
 
 
     // STreco selection
-  	// if ((Pl.Pt()<32 || (TMath::Abs(Pl.Eta()) > 1.4442 && TMath::Abs(Pl.Eta()) < 1.5660)) && Pl_ID==11) continue; //Electron Streco Selection
-    // if ((Pl.Pt()<30 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon Streco Selection [Pt(2016 and 2018: 26Gev ; 2017: 30Gev)]
-    // if (Pqspec.Pt()<40 || TMath::Abs(Pqspec.Eta())>4.7) continue; //Jet 1st selection
-    // if (TMath::Abs(Pqspec.Eta()) >= 2.4 && Pqspec.Pt() < 60) continue; //Jet Streco 2nd selection for |eta|>=2.4
-	  // if (Pb.Pt()<40 || TMath::Abs(Pb.Eta())>2.5) continue; //Streco Selection [Eta for 2016 >2.4 and for 2017/2018 >2.5]
+  	if ((Pl.Pt()<32 || (TMath::Abs(Pl.Eta()) > 1.4442 && TMath::Abs(Pl.Eta()) < 1.5660)) && Pl_ID==11) continue; //Electron Streco Selection
+    if ((Pl.Pt()<30 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon Streco Selection [Pt(2016 and 2018: 26Gev ; 2017: 30Gev)]
+    if (Pqspec.Pt()<40 || TMath::Abs(Pqspec.Eta())>4.7) continue; //Jet 1st selection
+    if (TMath::Abs(Pqspec.Eta()) >= 2.4 && Pqspec.Pt() < 60) continue; //Jet Streco 2nd selection for |eta|>=2.4
+	  if (Pb.Pt()<40 || TMath::Abs(Pb.Eta())>2.5) continue; //Streco Selection [Eta for 2016 >2.4 and for 2017/2018 >2.5]
     
 
 	  /* ANGLE RECONSTRUCTION */
