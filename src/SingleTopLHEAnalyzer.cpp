@@ -34,8 +34,7 @@ void SingleTopLHEAnalyzer::Loop()
 //  Note that the argument to GetEntry must be:
 //    jentry for TChain::GetEntry
 //    ientry for TTree::GetEntry and TBranch::GetEntry
-//
-//       To read only selected branches, Insert statements like:
+//.vscode/
 // METHOD1:
 //    fChain->SetBranchStatus("*",0);  // disable all branches
 //    fChain->SetBranchStatus("branchname",1);  // activate branchname
@@ -51,23 +50,6 @@ void SingleTopLHEAnalyzer::Loop()
    float top_pt, W_pt, lepton_pt;
    float top_mass, W_mass, W_transverse_mass;
    float nature_lepton;
-   float weight_SM;
-   float weight_cptb_m10, weight_cptb_m5, weight_cptb_p5, weight_cptb_p10;
-   float weight_cptbi_m10, weight_cptbi_m5, weight_cptbi_p5, weight_cptbi_p10;
-   float weight_ctw_m2, weight_ctw_m1, weight_ctw_p1, weight_ctw_p2;
-   float weight_ctwi_m2, weight_ctwi_m1, weight_ctwi_p1, weight_ctwi_p2;
-   float weight_cbw_m2, weight_cbw_m1, weight_cbw_p1, weight_cbw_p2;
-   float weight_cbwi_m2, weight_cbwi_m1, weight_cbwi_p1, weight_cbwi_p2;
-  //  Ctwi = -2 -> cbwi = {-2,-1,1,2}
-   float weight_ctwi_m2_cbwi_m2, weight_ctwi_m2_cbwi_m1, weight_ctwi_m2_cbwi_p1, weight_ctwi_m2_cbwi_p2;
-  //  Ctwi = -1 -> cbwi = {-2,-1,1,2}
-   float weight_ctwi_m1_cbwi_m2, weight_ctwi_m1_cbwi_m1, weight_ctwi_m1_cbwi_p1, weight_ctwi_m1_cbwi_p2;
-  // Ctwi = 1 -> cbwi = {-2,-2,1,2}
-   float weight_ctwi_p1_cbwi_m2, weight_ctwi_p1_cbwi_m1, weight_ctwi_p1_cbwi_p1, weight_ctwi_p1_cbwi_p2;
-  // Ctwi = 2 -> cbwi = {-2,-1,1,2}
-   float weight_ctwi_p2_cbwi_m2, weight_ctwi_p2_cbwi_m1, weight_ctwi_p2_cbwi_p1, weight_ctwi_p2_cbwi_p2;
-
-   double weight_sum[9];
 
    TFile* fOutput = new TFile("output.root","RECREATE");
    TTree* tOutput = new TTree("Tree","Tree");
@@ -89,57 +71,7 @@ void SingleTopLHEAnalyzer::Loop()
    tOutput->Branch("top_mass", &top_mass, "top_mass/F");
    tOutput->Branch("W_transverse_mass", &W_transverse_mass, "W_transverse_mass/F");
 
-   tOutput->Branch("weight_SM",&weight_SM,"weight_SM/F");
-
-   tOutput->Branch("weight_cptb_m10",&weight_cptb_m10,"weight_cptb_m10/F");
-   tOutput->Branch("weight_cptb_m5",&weight_cptb_m5,"weight_cptb_m5/F");
-   tOutput->Branch("weight_cptb_p5",&weight_cptb_p5,"weight_cptb_p5/F");
-   tOutput->Branch("weight_cptb_p10",&weight_cptb_p10,"weight_cptb_p10/F");
-
-   tOutput->Branch("weight_cptbi_m10",&weight_cptbi_m10,"weight_cptbi_m10/F");
-   tOutput->Branch("weight_cptbi_m5",&weight_cptbi_m5,"weight_cptbi_m5/F");
-   tOutput->Branch("weight_cptbi_p5",&weight_cptbi_p5,"weight_cptbi_p5/F");
-   tOutput->Branch("weight_cptbi_p10",&weight_cptbi_p10,"weight_cptbi_p10/F");
-
-   tOutput->Branch("weight_ctw_m2",&weight_ctw_m2,"weight_ctw_m2/F");
-   tOutput->Branch("weight_ctw_m1",&weight_ctw_m1,"weight_ctw_m1/F");
-   tOutput->Branch("weight_ctw_p1",&weight_ctw_p1,"weight_ctw_p1/F");
-   tOutput->Branch("weight_ctw_p2",&weight_ctw_p2,"weight_ctw_p2/F");
-
-   tOutput->Branch("weight_ctwi_m2",&weight_ctwi_m2,"weight_ctwi_m2/F");
-   tOutput->Branch("weight_ctwi_m1",&weight_ctwi_m1,"weight_ctwi_m1/F");
-   tOutput->Branch("weight_ctwi_p1",&weight_ctwi_p1,"weight_ctwi_p1/F");
-   tOutput->Branch("weight_ctwi_p2",&weight_ctwi_p2,"weight_ctwi_p2/F");
-
-   tOutput->Branch("weight_cbw_m2",&weight_cbw_m2,"weight_cbw_m2/F");
-   tOutput->Branch("weight_cbw_m1",&weight_cbw_m1,"weight_cbw_m1/F");
-   tOutput->Branch("weight_cbw_p1",&weight_cbw_p1,"weight_cbw_p1/F");
-   tOutput->Branch("weight_cbw_p2",&weight_cbw_p2,"weight_cbw_p2/F");
-
-   tOutput->Branch("weight_cbwi_m2",&weight_cbwi_m2,"weight_cbwi_m2/F");
-   tOutput->Branch("weight_cbwi_m1",&weight_cbwi_m1,"weight_cbwi_m1/F");
-   tOutput->Branch("weight_cbwi_p1",&weight_cbwi_p1,"weight_cbwi_p1/F");
-   tOutput->Branch("weight_cbwi_p2",&weight_cbwi_p2,"weight_cbwi_p2/F");
-
-   tOutput->Branch("weight_ctwi_m2_cbwi_m2",&weight_ctwi_m2_cbwi_m2,"weight_ctwi_m2_cbwi_m2/F");
-   tOutput->Branch("weight_ctwi_m2_cbwi_m1",&weight_ctwi_m2_cbwi_m1,"weight_ctwi_m2_cbwi_m1/F");
-   tOutput->Branch("weight_ctwi_m2_cbwi_p1",&weight_ctwi_m2_cbwi_p1,"weight_ctwi_m2_cbwi_p1/F");
-   tOutput->Branch("weight_ctwi_m2_cbwi_p2",&weight_ctwi_m2_cbwi_p2,"weight_ctwi_m2_cbwi_p2/F");
-
-   tOutput->Branch("weight_ctwi_m1_cbwi_m2",&weight_ctwi_m1_cbwi_m2,"weight_ctwi_m1_cbwi_m2/F");
-   tOutput->Branch("weight_ctwi_m1_cbwi_m1",&weight_ctwi_m1_cbwi_m1,"weight_ctwi_m1_cbwi_m1/F");
-   tOutput->Branch("weight_ctwi_m1_cbwi_p1",&weight_ctwi_m1_cbwi_p1,"weight_ctwi_m1_cbwi_p1/F");
-   tOutput->Branch("weight_ctwi_m1_cbwi_p2",&weight_ctwi_m1_cbwi_p2,"weight_ctwi_m1_cbwi_p2/F");
-
-   tOutput->Branch("weight_ctwi_p1_cbwi_m2",&weight_ctwi_p1_cbwi_m2,"weight_ctwi_p1_cbwi_m2/F");
-   tOutput->Branch("weight_ctwi_p1_cbwi_m1",&weight_ctwi_p1_cbwi_m1,"weight_ctwi_p1_cbwi_m1/F");
-   tOutput->Branch("weight_ctwi_p1_cbwi_p1",&weight_ctwi_p1_cbwi_p1,"weight_ctwi_p1_cbwi_p1/F");
-   tOutput->Branch("weight_ctwi_p1_cbwi_p2",&weight_ctwi_p1_cbwi_p2,"weight_ctwi_p1_cbwi_p2/F");
-
-   tOutput->Branch("weight_ctwi_p2_cbwi_m2",&weight_ctwi_p2_cbwi_m2,"weight_ctwi_p2_cbwi_m2/F");
-   tOutput->Branch("weight_ctwi_p2_cbwi_m1",&weight_ctwi_p2_cbwi_m1,"weight_ctwi_p2_cbwi_m1/F");
-   tOutput->Branch("weight_ctwi_p2_cbwi_p1",&weight_ctwi_p2_cbwi_p1,"weight_ctwi_p2_cbwi_p1/F");
-   tOutput->Branch("weight_ctwi_p2_cbwi_p2",&weight_ctwi_p2_cbwi_p2,"weight_ctwi_p2_cbwi_p2/F");
+  // Add New Branches in respect to your input file here
 
 
    if (fChain == 0) return;
@@ -167,59 +99,9 @@ void SingleTopLHEAnalyzer::Loop()
 	  for (int i=0; i<Particle_; i++){
 
       //If on wants to know the sum of the weights use a cout of this variables (sum of weights is linked to the Xsection)
-       if (Rwgt_>0){
-        // SM 
-         weight_SM = Rwgt_Weight[0];
-        // Cptb
-         weight_cptb_m10 = Rwgt_Weight[1];
-         weight_cptb_m5 = Rwgt_Weight[2];
-         weight_cptb_p5 = Rwgt_Weight[3];
-         weight_cptb_p10 = Rwgt_Weight[4]; 
-        // Cptbi
-         weight_cptbi_m10 = Rwgt_Weight[5];
-         weight_cptbi_m5 = Rwgt_Weight[6];
-         weight_cptbi_p5 = Rwgt_Weight[7];
-         weight_cptbi_p10 = Rwgt_Weight[8];
-        // Ctw
-         weight_ctw_m2 = Rwgt_Weight[9];
-         weight_ctw_m1 = Rwgt_Weight[10];
-         weight_ctw_p1 = Rwgt_Weight[11];
-         weight_ctw_p2 = Rwgt_Weight[12];
-        // Ctwi
-         weight_ctwi_m2 = Rwgt_Weight[13];
-         weight_ctwi_m1 = Rwgt_Weight[14];
-         weight_ctwi_p1 = Rwgt_Weight[15];
-         weight_ctwi_p2 = Rwgt_Weight[16];
-        // Cbw
-         weight_cbw_m2 = Rwgt_Weight[17];
-         weight_cbw_m1 = Rwgt_Weight[18];
-         weight_cbw_p1 = Rwgt_Weight[19];
-         weight_cbw_p2 = Rwgt_Weight[20];
-        // Cbwi
-         weight_cbwi_m2 = Rwgt_Weight[21];
-         weight_cbwi_m1 = Rwgt_Weight[22];
-         weight_cbwi_p1 = Rwgt_Weight[23];
-         weight_cbwi_p2 = Rwgt_Weight[24];
-        //  OffGrid ctwi/cbwi
-        weight_ctwi_m2_cbwi_m2 = Rwgt_Weight[25];
-        weight_ctwi_m2_cbwi_m1 = Rwgt_Weight[26];
-        weight_ctwi_m2_cbwi_p1 = Rwgt_Weight[27];
-        weight_ctwi_m2_cbwi_p2 = Rwgt_Weight[28];
-
-        weight_ctwi_m1_cbwi_m2 = Rwgt_Weight[29];
-        weight_ctwi_m1_cbwi_m1 = Rwgt_Weight[30];
-        weight_ctwi_m1_cbwi_p1 = Rwgt_Weight[31];
-        weight_ctwi_m1_cbwi_p2 = Rwgt_Weight[32];
-
-        weight_ctwi_p1_cbwi_m2 = Rwgt_Weight[33];
-        weight_ctwi_p1_cbwi_m1 = Rwgt_Weight[34];
-        weight_ctwi_p1_cbwi_p1 = Rwgt_Weight[35];
-        weight_ctwi_p1_cbwi_p2 = Rwgt_Weight[36];
-
-        weight_ctwi_p2_cbwi_m2 = Rwgt_Weight[37];
-        weight_ctwi_p2_cbwi_m1 = Rwgt_Weight[38];
-        weight_ctwi_p2_cbwi_p1 = Rwgt_Weight[39];
-        weight_ctwi_p2_cbwi_p2 = Rwgt_Weight[40];
+       if (Rwgt_>0)
+      {
+        // Add reweight branches here
 
       }
 
@@ -256,7 +138,7 @@ void SingleTopLHEAnalyzer::Loop()
 
 	  weight = Event_Weight[jentry];
 
-	  /* SELECTION */
+	  /* SELECTIONS */
     // M2 selection
   	if ((Pl.Pt()<35 || TMath::Abs(Pl.Eta())>1.479) && Pl_ID==11) continue; //Electron
     if ((Pl.Pt()<26 || TMath::Abs(Pl.Eta())>2.4) && Pl_ID==13) continue; //Muon
@@ -329,107 +211,3 @@ void SingleTopLHEAnalyzer::Loop()
    tOutput->Write();
    fOutput->Close();
 }
-
-
-
-
-
-/*
-         weight_SM_size=Rwgt_Weight[0];
-
-         weight_ctwi_p1_size=Rwgt_Weight[1];
-
-         weight_ctwi_m1_size=Rwgt_Weight[2];
-
-         weight_ctwi_p2_size=Rwgt_Weight[3];
-
-         weight_ctwi_m2_size=Rwgt_Weight[4];
-
-         weight_cbwi_p1_size=Rwgt_Weight[5];
-
-         weight_cbwi_m1_size=Rwgt_Weight[6];
-
-         weight_cbwi_p2_size=Rwgt_Weight[7];
-
-         weight_cbwi_m2_size=Rwgt_Weight[8];
-
-    weight_SM_size+=Rwgt_Weight[0];
-    weight_ctwi_p1_size+=Rwgt_Weight[1];
-    weight_ctwi_m1_size+=Rwgt_Weight[2];
-    weight_ctwi_p2_size+=Rwgt_Weight[3];
-    weight_ctwi_m2_size+=Rwgt_Weight[4];
-    weight_cbwi_p1_size+=Rwgt_Weight[5];
-    weight_cbwi_m1_size+=Rwgt_Weight[6];
-    weight_cbwi_p2_size+=Rwgt_Weight[7];
-    weight_cbwi_m2_size+=Rwgt_Weight[8];
-
-
-   cout<<"weight_SM_size= "<<weight_SM_size<<endl;
-   cout<<"weight_ctwi_p1_size= "<<weight_ctwi_p1_size<<endl;
-   cout<<"weight_ctwi_p2_size= "<<weight_ctwi_p2_size<<endl;
-   cout<<"weight_ctwi_m1_size= "<<weight_ctwi_m1_size<<endl;
-   cout<<"weight_ctwi_m2_size= "<<weight_ctwi_m2_size<<endl;
-   cout<<"weight_cbwi_p1_size= "<<weight_cbwi_p1_size<<endl;
-   cout<<"weight_cbwi_p2_size= "<<weight_cbwi_p2_size<<endl;
-   cout<<"weight_cbwi_m1_size= "<<weight_cbwi_m1_size<<endl;
-   cout<<"weight_cbwi_m2_size= "<<weight_cbwi_m2_size<<endl;
-
-
-
-  cout<<"weight_SM_size= "<<Rwgt_Weight[0]<<endl;
-  cout<<"weight_ctwi_p1_size= "<<Rwgt_Weight[1]<<endl;
-  cout<<"weight_ctwi_p2_size= "<<Rwgt_Weight[2]<<endl;
-  cout<<"weight_ctwi_m1_size= "<<Rwgt_Weight[3]<<endl;
-  cout<<"weight_ctwi_m2_size= "<<Rwgt_Weight[4]<<endl;
-  cout<<"weight_cbwi_p1_size= "<<Rwgt_Weight[5]<<endl;
-  cout<<"weight_cbwi_p2_size= "<<Rwgt_Weight[6]<<endl;
-  cout<<"weight_cbwi_m1_size= "<<Rwgt_Weight[7]<<endl;
-  cout<<"weight_cbwi_m2_size= "<<Rwgt_Weight[8]<<endl;
-
-      cout<<"weight_sum0= "<<weight_sum[0]<<endl;
-      cout<<"weight_sum1= "<<weight_sum[1]<<endl;
-      cout<<"weight_sum2= "<<weight_sum[2]<<endl;
-      cout<<"weight_sum3= "<<weight_sum[3]<<endl;
-      cout<<"weight_sum4= "<<weight_sum[4]<<endl;
-      cout<<"weight_sum5= "<<weight_sum[5]<<endl;
-      cout<<"weight_sum6= "<<weight_sum[6]<<endl;
-      cout<<"weight_sum7= "<<weight_sum[7]<<endl;
-      cout<<"weight_sum8= "<<weight_sum[8]<<endl;
-
-
-
-
-      weight_sum[0]+=Rwgt_Weight[0];
-      weight_sum[1]+=Rwgt_Weight[1];
-      weight_sum[2]+=Rwgt_Weight[2];
-      weight_sum[3]+=Rwgt_Weight[3];
-      weight_sum[4]+=Rwgt_Weight[4];
-      weight_sum[5]+=Rwgt_Weight[5];
-      weight_sum[6]+=Rwgt_Weight[6];
-      weight_sum[7]+=Rwgt_Weight[7];
-      weight_sum[8]+=Rwgt_Weight[8];
-
-    weight_SM_size=Rwgt_Weight[0];
-    weight_ctwi_p1_size=Rwgt_Weight[1];
-    weight_ctwi_m1_size=Rwgt_Weight[2];
-    weight_ctwi_p2_size=Rwgt_Weight[3];
-    weight_ctwi_m2_size=Rwgt_Weight[4];
-    weight_cbwi_p1_size=Rwgt_Weight[5];
-    weight_cbwi_m1_size=Rwgt_Weight[6];
-    weight_cbwi_p2_size=Rwgt_Weight[7];
-    weight_cbwi_m2_size=Rwgt_Weight[8];
-
-    weight_SM_size = 0;
-    weight_ctwi_p1_size = 0;
-    weight_ctwi_m1_size = 0;
-    weight_ctwi_p2_size = 0;
-    weight_ctwi_m2_size = 0;
-    weight_cbwi_p1_size = 0;
-    weight_cbwi_m1_size = 0;
-    weight_cbwi_p2_size = 0;
-    weight_cbwi_m2_size = 0;
-
-
-
-
-*/
