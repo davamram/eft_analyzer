@@ -14,14 +14,14 @@ using namespace std;
 
 int main()
 {
-  int nSamples = 20;
+  int nSamples = 1;
   int modes = 1;
   string* suffix = new string[nSamples];
   string* prefix = new string[modes];
 
-prefix[0]=""; // Name of input File
+prefix[0]="t_channel_"; // Name of input File
 
-suffix[0] ="";
+suffix[0] = "EFT_atLO_nomadspin_reweight729";
 
   TFile** fInput = new TFile*[nSamples];
   TTree** tInput = new TTree*[nSamples];
@@ -31,8 +31,8 @@ suffix[0] ="";
   {
     for (int i=0; i<nSamples; i++)
     {
-      string nb = to_string(i+1);
-      suffix[i]= nb;
+      // string nb = to_string(i+1);
+      // suffix[i]= nb;
       cout<<"Cooking "+prefix[j] + suffix[i]+".root"<<endl;
 
      ///////////////////////////Choose Input Path files//////////////////////////////////////
