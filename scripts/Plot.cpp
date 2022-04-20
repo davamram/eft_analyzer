@@ -21,7 +21,7 @@ using namespace std;
 bool reweight = false;
 
 bool normalization = true; //Turn on normalization to 1
-bool log_fity = false; //Turn on log scale in Y axis
+bool log_fity = true; //Turn on log scale in Y axis
 bool diff_xsection = false; //Change this to have histograms normalized to Xsection
 bool flows = false; //Change this to Active/Deactivate Overflow and Underflow for all Histograms
 
@@ -342,7 +342,7 @@ void Compare_1Histos(TTree* t1, string variable, int nbins, double xmin, double 
    Canvas->Print(Name.c_str());
 }
 
-void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string Name){
+void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string Name){
 
   TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
   TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
@@ -363,43 +363,41 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
 
   TCanvas* Canvas = new TCanvas("Canvas","Canvas");
   Histo_1->SetTitle("");
-  Histo_1->SetAxisRange(0,max*1.3,"Y");
-  if (legendX == "Top Mass (GeV)")
-    {
-      Histo_1->SetAxisRange(0.0001,max*1.1,"Y");
-      Canvas->SetLogy();
-    }
-  if (legendX == "W Mass (GeV)")
-    {
-      Histo_1->SetAxisRange(0.001,max*1.1,"Y");
-      Canvas->SetLogy();
-    }
+  Histo_1->SetAxisRange(0,max*1.33,"Y");
+
+  float lineWidth = 4.0;
+
   Histo_1->SetXTitle(legendX.c_str());
   Histo_1->SetYTitle(legendY.c_str());
   Histo_1->SetLineColor(kRed);
-  Histo_1->SetLineWidth(2);
+  Histo_1->SetLineWidth(lineWidth);
   Histo_1->Draw();
 
   Histo_2->SetLineColor(kBlue);
-  Histo_2->SetLineWidth(2);
+  Histo_2->SetLineWidth(lineWidth);
   Histo_2->Draw("SAME");
 
  double lx0, ly0, lx1, ly1;
   if (legendPlace=="legendUpLeft"){
 	 lx0 = 0.2;
-	 ly0 = 0.75;
-	 lx1 = 0.5;
+	 ly0 = 0.65;
+	 lx1 = 0.55;
 	 ly1 = 0.95;
   }
    if (legendPlace=="legendUpRight"){
-	 lx0 = 0.75;
-	 ly0 = 0.75;
+	 lx0 = 0.70;
+	 ly0 = 0.70;
 	 lx1 = 0.99;
 	 ly1 = 0.99;
   }
 
   TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
   legend->SetFillColor(kWhite);
+
+  if(l_cptb != "") legend->AddEntry((TObject*)0, l_cptb.c_str(), "");
+  if(l_ctw != "") legend->AddEntry((TObject*)0, l_ctw.c_str(), "");
+  if(l_cbw != "") legend->AddEntry((TObject*)0, l_cbw.c_str(), "");
+
   legend->AddEntry(Histo_1->GetName(), legendEntry1.c_str(), "l");
   legend->AddEntry(Histo_2->GetName(), legendEntry2.c_str(), "l");
   legend->Draw("SAME");
@@ -408,6 +406,7 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
 
 
   Name += ".png";
+  Canvas->SetCanvasSize(2000,1500);
   Canvas->Print(Name.c_str());
 
   // cout << "Histo1 mean: "<<Histo_1->GetMean()<<endl;
@@ -415,7 +414,7 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
 
 }
 
-void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string selection3, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string legendEntry3, string EFT, string Name){
+void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string selection3, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string legendEntry3, string EFT, string Name){
   
   Name += variable;
   
@@ -430,12 +429,7 @@ void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins
   TCanvas* Canvas = new TCanvas("Canvas","Canvas");
   Histo_1->SetTitle("");
 
-  if(log_fity) 
-  {
-    Canvas->SetLogy();
-    Name += "_log"; 
-    legendY += " log";
-  }
+
   if(normalization) 
   {
     Double_t integral1 = 1/Histo_1->Integral();
@@ -450,6 +444,14 @@ void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins
     Name += "_normalized";
     legendY += " normalized";
   }
+  if(log_fity) 
+  {
+    Canvas->SetLogy();
+    Name += "_log"; 
+    legendY += " log";
+  }
+  float lineWidth = 4.0;
+
 
   double max = (Histo_1->GetMaximum()>Histo_2->GetMaximum()) ? Histo_1->GetMaximum() : Histo_2->GetMaximum();
   Histo_1->SetMaximum(max*1.3 );
@@ -457,17 +459,17 @@ void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins
   Histo_1->SetXTitle(legendX.c_str());
   Histo_1->SetYTitle(legendY.c_str());
   Histo_1->SetLineColor(kRed);
-  Histo_1->SetLineWidth(2);
+  Histo_1->SetLineWidth(lineWidth);
   Histo_1->Draw();
 
   
   Histo_2->SetLineColor(kBlue);
-  Histo_2->SetLineWidth(2);
+  Histo_2->SetLineWidth(lineWidth);
   Histo_2->Draw("SAME");
 
   
   Histo_3->SetLineColor(kOrange);
-  Histo_3->SetLineWidth(2);
+  Histo_3->SetLineWidth(lineWidth);
   Histo_3->Draw("SAME");
 
 
@@ -487,6 +489,11 @@ void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins
   
   TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
   legend->SetFillColor(kWhite);
+
+  if(l_cptb != "") legend->AddEntry((TObject*)0, l_cptb.c_str(), "");
+  if(l_ctw != "") legend->AddEntry((TObject*)0, l_ctw.c_str(), "");
+  if(l_cbw != "") legend->AddEntry((TObject*)0, l_cbw.c_str(), "");
+
   legend->SetTextSize(0.04);
 
   legend->AddEntry(Histo_1->GetName(), legendEntry1.c_str(),"l");
@@ -495,8 +502,9 @@ void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins
   //legend->SetLegendSize(0.5);
 
   legend->Draw("SAME");
+  Canvas->SetCanvasSize(2000,1500);
 
-  Name += ".pdf";
+  Name += ".png";
   Canvas->Print(Name.c_str());
 }
 
@@ -926,52 +934,55 @@ void Compare_9Histos(int nbins, double xmin, double xmax, string selection1, str
   TH1D *Histo_9 = GetHistoWeight(t9, variable9, nbins, xmin, xmax, selection9, "Histo_9");
 
 
+  float lineWidth = 4.0;
+
+
   double max = Histo_1->GetMaximum();
   TCanvas* Canvas = new TCanvas("Canvas","Canvas");
   Histo_1->SetTitle("");
-  Histo_1->SetAxisRange(0,max*2.2,"Y");
+  Histo_1->SetAxisRange(0,max*1.1,"Y");
   //Histo_SM->SetAxisRange(-0.3,0.5,"X");
   //Histo_SM->SetAxisRange(-10,10,"X");
   Histo_1->SetXTitle(legendX.c_str());
   Histo_1->SetYTitle(legendY.c_str());
   Histo_1->SetLineColor(kRed);
-  Histo_1->SetLineWidth(2);
+  Histo_1->SetLineWidth(lineWidth);
   Histo_1->Draw();
 
   Histo_2->SetLineColor(kBlue);
-  Histo_2->SetLineWidth(2);
+  Histo_2->SetLineWidth(lineWidth);
   Histo_2->Draw("SAME");
 
   Histo_3->SetLineColor(kGreen);
-  Histo_3->SetLineWidth(2);
+  Histo_3->SetLineWidth(lineWidth);
   Histo_3->Draw("SAME");
 
   Histo_4->SetLineColor(kViolet);
-  Histo_4->SetLineWidth(2);
+  Histo_4->SetLineWidth(lineWidth);
   Histo_4->Draw("SAME");
 
   Histo_5->SetLineColor(kOrange);
-  Histo_5->SetLineWidth(2);
+  Histo_5->SetLineWidth(lineWidth);
   Histo_5->Draw("SAME");
 
   Histo_6->SetLineColor(kBlue);
   Histo_6->SetLineStyle(3);
-  Histo_6->SetLineWidth(2);
+  Histo_6->SetLineWidth(lineWidth);
   Histo_6->Draw("SAME");
 
   Histo_7->SetLineColor(kGreen);
   Histo_7->SetLineStyle(3);
-  Histo_7->SetLineWidth(2);
+  Histo_7->SetLineWidth(lineWidth);
   Histo_7->Draw("SAME");
 
   Histo_8->SetLineColor(kViolet);
   Histo_8->SetLineStyle(3);
-  Histo_8->SetLineWidth(2);
+  Histo_8->SetLineWidth(lineWidth);
   Histo_8->Draw("SAME");
 
   Histo_9->SetLineColor(kOrange);
   Histo_9->SetLineStyle(3);
-  Histo_9->SetLineWidth(2);
+  Histo_9->SetLineWidth(lineWidth);
   Histo_9->Draw("SAME");
 
 
@@ -993,19 +1004,20 @@ void Compare_9Histos(int nbins, double xmin, double xmax, string selection1, str
    TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
    legend->SetFillColor(kWhite);
    legend->AddEntry(Histo_1->GetName(), "SM", "l");
-   legend->AddEntry(Histo_2->GetName(), "C_{bw}^{I}=-2", "l");
-   legend->AddEntry(Histo_3->GetName(), "C_{bw}^{I}=-1", "l");
-   legend->AddEntry(Histo_4->GetName(), "C_{bw}^{I}=1", "l");
-   legend->AddEntry(Histo_5->GetName(), "C_{bw}^{I}=2", "l");
-   legend->AddEntry(Histo_6->GetName(), "C_{tw}^{I}=-2", "l"); 
-   legend->AddEntry(Histo_7->GetName(), "C_{tw}^{I}=-1", "l"); 
-   legend->AddEntry(Histo_8->GetName(), "C_{tw}^{I}=1", "l"); 
-   legend->AddEntry(Histo_9->GetName(), "C_{tw}^{I}=2", "l"); 
+   legend->AddEntry(Histo_2->GetName(), "C_{ptb} = -5", "l");
+   legend->AddEntry(Histo_3->GetName(), "C_{ptb}^{I} = -5", "l");
+   legend->AddEntry(Histo_4->GetName(), "C_{tw} = -2", "l");
+   legend->AddEntry(Histo_5->GetName(), "C_{tw}^{I} = -2", "l");
+   legend->AddEntry(Histo_6->GetName(), "C_{bw} = -2", "l"); 
+   legend->AddEntry(Histo_7->GetName(), "C_{bw}^{I} = -2", "l"); 
+   legend->AddEntry(Histo_8->GetName(), "C_{ptb}^{I} = 1 , C_{tw} = 2", "l"); 
+   legend->AddEntry(Histo_9->GetName(), "C_{ptb} = 5 , C_{bw}^{I} = -2", "l"); 
 
    legend->Draw("SAME");
 
 
-   Name = Name + ".pdf";
+   Name = Name + ".png";
+   Canvas->SetCanvasSize(2000,1500);
    Canvas->Print(Name.c_str());
 
 }
@@ -1014,96 +1026,105 @@ void Compare_9Histos(int nbins, double xmin, double xmax, string selection1, str
 int main ()
 {
 
-  string StandalonPath = "data/madgraph/CutData/Standalone/";
-  string StandalonPathStrecoSelection = "data/madgraph/CutData/Standalone/STrecoSelection/";
-  string RwgtPath = "data/madgraph/CutData/Rwgted/";
-  string Dim6onlyInProduction = "data/madgraph/CutData/Standalone/DIM6=1/"; 
-
-  string FileIndex = "output_t_channel_";
-
-  /////////////////Standalone Files/////////////////
-  // SM input file
-  TTree* SM = FileReader(StandalonPath + FileIndex + "SM.root");
-  // ctw
-  TTree* ctw_m2 = FileReader(StandalonPath + FileIndex + "ctw_m2.root");
-  TTree* ctw_m1 = FileReader(StandalonPath + FileIndex + "ctw_m1.root");
-  TTree* ctw_p1 = FileReader(StandalonPath + FileIndex + "ctw_p1.root");
-  TTree* ctw_p2 = FileReader(StandalonPath + FileIndex + "ctw_p2.root");
-  // ctwi
-  TTree* ctwi_m5 = FileReader(StandalonPath + FileIndex + "ctwi_m5.root");
-  TTree* ctwi_m2 = FileReader(StandalonPath + FileIndex + "ctwi_m2.root");
-  TTree* ctwi_m1 = FileReader(StandalonPath + FileIndex + "ctwi_m1.root");
-  TTree* ctwi_p1 = FileReader(StandalonPath + FileIndex + "ctwi_p1.root");
-  TTree* ctwi_p2 = FileReader(StandalonPath + FileIndex + "ctwi_p2.root");
-  TTree* ctwi_p5 = FileReader(StandalonPath + FileIndex + "ctwi_p5.root");
-  // cbw
-  TTree* cbw_m2 = FileReader(StandalonPath + FileIndex + "cbw_m2.root");
-  TTree* cbw_m1 = FileReader(StandalonPath + FileIndex + "cbw_m1.root");
-  TTree* cbw_p1 = FileReader(StandalonPath + FileIndex + "cbw_p1.root");
-  TTree* cbw_p2 = FileReader(StandalonPath + FileIndex + "cbw_p2.root");
-  // cbwi
-  TTree* cbwi_m5 = FileReader(StandalonPath + FileIndex + "cbwi_m5.root");
-  TTree* cbwi_m2 = FileReader(StandalonPath + FileIndex + "cbwi_m2.root");
-  TTree* cbwi_m1 = FileReader(StandalonPath + FileIndex + "cbwi_m1.root");
-  TTree* cbwi_p1 = FileReader(StandalonPath + FileIndex + "cbwi_p1.root");
-  TTree* cbwi_p2 = FileReader(StandalonPath + FileIndex + "cbwi_p2.root");
-  TTree* cbwi_p5 = FileReader(StandalonPath + FileIndex + "cbwi_p5.root");
-  // cptb
-  TTree* cptb_m10 = FileReader(StandalonPath + FileIndex + "cptb_m10.root");
-  TTree* cptb_m5 = FileReader(StandalonPath + FileIndex + "cptb_m5.root");
-  TTree* cptb_p5 = FileReader(StandalonPath + FileIndex + "cptb_p5.root");
-  TTree* cptb_p10 = FileReader(StandalonPath + FileIndex + "cptb_p10.root");
-  // cptbi
-  TTree* cptbi_m10 = FileReader(StandalonPath + FileIndex + "cptbi_m10.root");
-  TTree* cptbi_m5 = FileReader(StandalonPath + FileIndex + "cptbi_m5.root");
-  TTree* cptbi_p5 = FileReader(StandalonPath + FileIndex + "cptbi_p5.root");
-  TTree* cptbi_p10 = FileReader(StandalonPath + FileIndex + "cptbi_p10.root");
-
-  // Parametric Space OffGrid Files in Standalone MG5
-  TTree* ctwi_p2_cbwi_p2 = FileReader(StandalonPath + "output_t_channel_ctwi_m2_cbwi_m2.root");
-
-  /////////////////Reweighted Files with STreco Selection/////////////////
-  TTree* rwgt1STreco = FileReader(RwgtPath + "output_t_channel_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_rwgtATcbwi2p5_STreco.root"); //rwgt_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi
-  TTree* rwgt2STreco = FileReader(RwgtPath + "output_t_channel_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_rwgtATcbwi2p5_STreco_10M.root"); //rwgt_SM_ctw_cbw_cptb_ctwi_cbwi_cptbi_10M
-
-  /////////////////Reweighted Files with regular selection/////////////////
-  TTree* rwgt1 = FileReader(RwgtPath + "output_t_channel_ctwI_cbwI_cptbI_rwgtATcbwi2p5.root");
-  TTree* rwgt2 = FileReader(RwgtPath + "output_t_channel_ctw_cbw_cptb_ctwi_cbwi_cptbi_OG_ctwi_cbwi.root"); // OG grid values of ctwi and cbwi
-  TTree* rwgtM2 = FileReader(RwgtPath + "output_t_channel_SM_ctwi_cbwi_rwgtAtcbwi2p5.root"); //Used during M2 internship: rwgt_SM_ctwi_cbwi
-
-  /////////////////DIM6 = 1 Files/////////////////
-  TTree* SM_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "SM_1dim6.root");
-  TTree* cbwi_m2_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "cbwi_m2_1dim6.root");
-  TTree* ctwi_m2_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "ctwi_m2_1dim6.root");
-  TTree* ctwi_p2_1Dim6 = FileReader(Dim6onlyInProduction + FileIndex + "ctwi_p2_1dim6.root");
+  // Root files pathways
+  string tarballInputPWDfiles = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/cookedFiles/STrecoSelection/lhapdf306000/LO/tarballFile/";
+  string stdMG5_500k_events_atLO = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/cookedFiles/STrecoSelection/lhapdf306000/LO/standaloneMG5/500k_events/";
+  string stdMG5_5M_events_atLO = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/cookedFiles/STrecoSelection/lhapdf306000/LO/standaloneMG5/5M_events/";
 
 
-  string Variables [] = {"PhiStar", "cosThetaStar", "cosTheta", "top_mass", "top_pt", "W_pt", "W_mass", "W_transverse_mass"};
-
-  // PhiStar
-  Compare_5Histos(SM,ctwi_m2,ctwi_m2,ctwi_p1,ctwi_p2,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{tW}^{I} = -2","C_{tW}^{I} = -1","C_{tW}^{I} = 1","C_{tW}^{I} = 2","results/Compare_5Histos/PhiStar/SM_vs_ctwi-m2_vs_ctwi-m1_vs_ctwi-p1_vs_ctwi-p2");
-  Compare_5Histos(SM,cbwi_m2,cbwi_m2,cbwi_p1,cbwi_p2,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{bW}^{I} = -2","C_{bW}^{I} = -1","C_{bW}^{I} = 1","C_{bW}^{I} = 2","results/Compare_5Histos/PhiStar/SM_vs_cbwi-m2_vs_cbwi-m1_vs_cbwi-p1_vs_cbwi-p2");
-  Compare_5Histos(SM,cbw_m2,cbw_m2,cbw_p1,cbw_p2,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{bW} = -2","C_{bW} = -1","C_{bW} = 1","C_{bW} = 2","results/Compare_5Histos/PhiStar/SM_vs_cbw-m2_vs_cbw-m1_vs_cbw-p1_vs_cbw-p2");
-  Compare_5Histos(SM,ctw_m2,ctw_m2,ctw_p1,ctw_p2,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{tW} = -2","C_{tW} = -1","C_{tW} = 1","C_{tW} = 2","results/Compare_5Histos/PhiStar/SM_vs_ctw-m2_vs_ctw-m1_vs_ctw-p1_vs_ctw-p2");
-  Compare_5Histos(SM,cptbi_m10,cptbi_m5,cptbi_p5,cptbi_p10,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb}^{I} = -10","C_{ptb}^{I} = -5","C_{ptb}^{I} = 5","C_{ptb}^{I} = 10","results/Compare_5Histos/PhiStar/SM_vs_cptbi-m10_vs_cptbi-m5_vs_cptbi-p5_vs_cptbi-p10");
-  Compare_5Histos(SM,cptb_m10,cptb_m5,cptb_p5,cptb_p10,Variables[0],20,0,2*TMath::Pi(),"1","1","1","1","1","phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb} = -10","C_{ptb} = -5","C_{ptb} = 5","C_{ptb} = 10","results/Compare_5Histos/PhiStar/SM_vs_cptb-m10_vs_cptb-m5_vs_cptb-p5_vs_cptb-p10");
+  // Root files definitions as TTree objects
+  TTree* rwgt_729 = FileReader(tarballInputPWDfiles + "output_t_channel_EFT_atLO_nomadspin_reweight_729_init2_5M.root");
+  TTree* rwgt_729_initial_sample = FileReader(tarballInputPWDfiles + "output_t_channel_EFT_atLO_nomadspin_reweight729.root");
 
 
-  // cosThetaStar
-  Compare_5Histos(SM,ctwi_m2,ctwi_m2,ctwi_p1,ctwi_p2,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{tW}^{I} = -2","C_{tW}^{I} = -1","C_{tW}^{I} = 1","C_{tW}^{I} = 2","results/Compare_5Histos/cosThetaStar/SM_vs_ctwi-m2_vs_ctwi-m1_vs_ctwi-p1_vs_ctwi-p2");
-  Compare_5Histos(SM,cbwi_m2,cbwi_m2,cbwi_p1,cbwi_p2,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{bW}^{I} = -2","C_{bW}^{I} = -1","C_{bW}^{I} = 1","C_{bW}^{I} = 2","results/Compare_5Histos/cosThetaStar/SM_vs_cbwi-m2_vs_cbwi-m1_vs_cbwi-p1_vs_cbwi-p2");
-  Compare_5Histos(SM,cbw_m2,cbw_m2,cbw_p1,cbw_p2,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{bW} = -2","C_{bW} = -1","C_{bW} = 1","C_{bW} = 2","results/Compare_5Histos/cosThetaStar/SM_vs_cbw-m2_vs_cbw-m1_vs_cbw-p1_vs_cbw-p2");
-  Compare_5Histos(SM,ctw_m2,ctw_m2,ctw_p1,ctw_p2,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{tW} = -2","C_{tW} = -1","C_{tW} = 1","C_{tW} = 2","results/Compare_5Histos/cosThetaStar/SM_vs_ctw-m2_vs_ctw-m1_vs_ctw-p1_vs_ctw-p2");
-  Compare_5Histos(SM,cptbi_m10,cptbi_m5,cptbi_p5,cptbi_p10,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb}^{I} = -10","C_{ptb}^{I} = -5","C_{ptb}^{I} = 5","C_{ptb}^{I} = 10","results/Compare_5Histos/cosThetaStar/SM_vs_cptbi-m10_vs_cptbi-m5_vs_cptbi-p5_vs_cptbi-p10");
-  Compare_5Histos(SM,cptb_m10,cptb_m5,cptb_p5,cptb_p10,Variables[1],20,-1,1,"1","1","1","1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb} = -10","C_{ptb} = -5","C_{ptb} = 5","C_{ptb} = 10","results/Compare_5Histos/cosThetaStar/SM_vs_cptb-m10_vs_cptb-m5_vs_cptb-p5_vs_cptb-p10");
+  TTree* std_SM = FileReader(stdMG5_500k_events_atLO + "output_t_channel_SM.root");
 
- // top_mass
-  Compare_5Histos(rwgt2,rwgt2,rwgt2,rwgt2,rwgt2,Variables[3],20,170,176,"weight_SM","weight_cptbi_m10","weight_cptbi_m5","weight_cptbi_p5","weight_cptbi_p10","m_{t}","","legendUpRight","Dim6 [TeV^{2}]","SM","C_{ptb}^{I} = -10","C_{ptb}^{I} = -5","C_{ptb}^{I} = 5","C_{ptb}^{I} = 10","results/Compare_5Histos/top_mass/cptbi_all");
+  TTree* std_ctwi_m2 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_ctwi_m2.root");
 
-  // Comparing Rwgt
-  Compare_2Histos(rwgt2,cptbi_m10,Variables[0],20,0,2*TMath::Pi(),"weight_cptbi_m10","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{2}]","C_{ptb}^{I} = -10 (rwgt)","C_{ptb}^{I} = -10","results/Compare_2Histos/testingRwgt/" + Variables[0] +  "/rwgt2/ctpbi_m10");
-  Compare_2Histos(rwgt2,cptbi_m10,Variables[1],20,-1,1,"weight_cptbi_m10","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{2}]","C_{ptb}^{I} = -10 (rwgt)","C_{ptb}^{I} = -10","results/Compare_2Histos/testingRwgt/" + Variables[1] +  "/rwgt2/ctpbi_m10");
+  TTree* std_cbwi_m2 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_cbwi_m2.root");
+  TTree* std_cbwi_p2 = FileReader(stdMG5_5M_events_atLO + "output_t_channel_cbwi_p2.root");
 
+
+  TTree* std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2.root");
+  TTree* std_cptbi_p5_ctw_p2_cbw_p2 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_cptbi_p5_ctw_p2_cbw_p2.root");
+  
+  TTree* std_allDIM6_p2p5 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_allDIM6_p2p5.root");
+
+
+
+  // Outputs pathways definitins
+  string output_c2h = "results/compare2Histos/";
+  string output_c3h = "results/compare3Histos/";
+  string output_c9h = "results/compare9Histos/";
+
+
+
+  // Compare 2 Histos
+    // PhiStar
+  // Compare_2Histos(rwgt_729,std_SM,"PhiStar",25,0,2*TMath::Pi(),"weight_SM","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"PhiStar/SM");
+  
+  // Compare_2Histos(rwgt_729,std_ctwi_m2,"PhiStar",25,0,2*TMath::Pi(),"weight_ctwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"PhiStar/ctwi_m2");
+  
+  // Compare_2Histos(rwgt_729,std_cbwi_m2,"PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"PhiStar/cbwi_m2"); 
+  // Compare_2Histos(rwgt_729,std_cbwi_p2,"PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_p2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=2","Rwgt","Std",output_c2h+"PhiStar/cbwi_p2"); 
+  // Compare_2Histos(std_cbwi_p2,std_cbwi_m2,"PhiStar",25,0,2*TMath::Pi(),"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","Std","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"PhiStar/allStd_cbwi_m2_cbwi_p2");
+  Compare_2Histos(rwgt_729,rwgt_729,"PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_p2","weight_cbwi_m2","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","Rwgt","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"PhiStar/allRwgt_cbwi_m2_cbwi_p2");
+
+
+  
+  // Compare_2Histos(rwgt_729,std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2,"PhiStar",25,0,2*TMath::Pi(),"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"PhiStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(rwgt_729,std_cptbi_p5_ctw_p2_cbw_p2,"PhiStar",25,0,2*TMath::Pi(),"weight_cptbi_p5_ctw_p2_cbw_p2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"PhiStar/std_cptbi_p5_ctw_p2_cbw_p2");
+
+
+    // cosThetaStar
+  // Compare_2Histos(rwgt_729,std_SM,"cosThetaStar",25,-1,1,"weight_SM","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"cosThetaStar/SM");
+  
+  // Compare_2Histos(rwgt_729,std_ctwi_m2,"cosThetaStar",25,-1,1,"weight_ctwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"cosThetaStar/ctwi_m2");
+  
+  // Compare_2Histos(rwgt_729,std_cbwi_m2,"cosThetaStar",25,-1,1,"weight_cbwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"cosThetaStar/cbwi_m2");
+  // Compare_2Histos(rwgt_729,std_cbwi_p2,"cosThetaStar",25,-1,1,"weight_cbwi_p2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=2","Rwgt","Std",output_c2h+"cosThetaStar/cbwi_p2");
+  // Compare_2Histos(std_cbwi_p2,std_cbwi_m2,"cosThetaStar",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","Std","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"cosThetaStar/allStd_cbwi_m2_cbwi_p2");
+
+  // Compare_2Histos(rwgt_729,std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2,"cosThetaStar",25,-1,1,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"cosThetaStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(rwgt_729,std_cptbi_p5_ctw_p2_cbw_p2,"cosThetaStar",25,-1,1,"weight_cptbi_p5_ctw_p2_cbw_p2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"cosThetaStar/std_cptbi_p5_ctw_p2_cbw_p2");
+
+
+    // cosTheta
+  // Compare_2Histos(rwgt_729,std_SM,"cosTheta",25,-1,1,"weight_SM","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"cosTheta/SM");
+  
+  // Compare_2Histos(rwgt_729,std_ctwi_m2,"cosTheta",25,-1,1,"weight_ctwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"cosTheta/ctwi_m2");
+  
+  // Compare_2Histos(rwgt_729,std_cbwi_m2,"cosTheta",25,-1,1,"weight_cbwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"cosTheta/cbwi_m2");
+  
+  // Compare_2Histos(rwgt_729,std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2,"cosTheta",25,-1,1,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"cosTheta/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(rwgt_729,std_cptbi_p5_ctw_p2_cbw_p2,"cosTheta",25,-1,1,"weight_cptbi_p5_ctw_p2_cbw_p2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"cosTheta/std_cptbi_p5_ctw_p2_cbw_p2");
+
+
+  // Top Mass
+  // Compare_2Histos(rwgt_729,std_SM,"top_mass",25,166,178,"weight_SM","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"top_mass/SM");
+  
+  // Compare_2Histos(rwgt_729,std_ctwi_m2,"top_mass",25,166,178,"weight_ctwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"top_mass/ctwi_m2");
+  
+  // Compare_2Histos(rwgt_729,std_cbwi_m2,"top_mass",25,166,178,"weight_cbwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"top_mass/cbwi_m2");
+  
+  // Compare_2Histos(rwgt_729,std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2,"top_mass",25,166,178,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"top_mass/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(rwgt_729,std_cptbi_p5_ctw_p2_cbw_p2,"top_mass",25,166,178,"weight_cptbi_p5_ctw_p2_cbw_p2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"top_mass/std_cptbi_p5_ctw_p2_cbw_p2");
+
+
+  
+  // Compare 3 Histos
+    // PhiStar
+  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"PhiStar",25,0,2*TMath::Pi(),"weight_SM","weight_ctwi_m2","weight_ctwi_p2","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"PhiStar/SM_ctwi_m2_ctwi_p2");
+
+    // costhetaStar
+  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"cosThetaStar",25,-1,1,"weight_SM","weight_cbwi_m2","weight_cbwi_p2","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{bW}^{I} = -2","C_{bW}^{I} = 2","",output_c3h+"cosThetaStar/SM_cbwi_m2_cbwi_p2_");
+  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"cosThetaStar",25,-1,1,"weight_SM","weight_ctwi_m2","weight_ctwi_p2","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"cosThetaStar/SM_ctwi_m2_ctwi_p2_");
+  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"top_mass",25,100,400,"weight_SM","weight_ctwi_m2","weight_ctwi_p2","Mass_{Top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"top_mass/SM_ctwi_m2_ctwi_m2_");
+  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"top_mass",25,100,400,"weight_SM","weight_cbwi_m2","weight_cbwi_p2","Mass_{Top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{bW}^{I} = -2","C_{bW}^{I} = 2","",output_c3h+"top_mass/SM_cbwi_m2_cbwi_m2_");
+
+
+  // Compare 9 Histos
+  // Compare_9Histos(20,0,0.04,"weight_SM","weight_cptb_m5","weight_cptbi_m5","weight_ctw_m2","weight_ctwi_m2","weight_cbw_m2","weight_cbwi_m2","weight_cptbi_m5_ctw_p2","weight_cptb_p5_cbwi_m2",rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,"weight_SM","weight_cptb_m5","weight_cptbi_m5","weight_ctw_m2","weight_ctwi_m2","weight_cbw_m2","weight_cbwi_m2","weight_cptbi_m5_ctw_p2","weight_cptb_p5_cbwi_m2","Weight","","legendUpRight","Dim6 EFT value [TeV^{-2}]",output_c9h+"weights/weights1");
 
   return 0;
 }
