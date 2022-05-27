@@ -7,3 +7,5 @@ results/
 cardsGenproduction/DataForCard729/
 *.pdf
 *.png
+*.log
+*.txt
