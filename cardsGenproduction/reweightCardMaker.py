@@ -51,9 +51,8 @@ reweightCard.write("change rwgt_dir rwgt \n \n")
 
 
 count = 0
-cuts1 = [-4,-3,-2,-1,1,2,3,4] #Cuts on values of ctw, ctwi, cbw, cbwi
+cuts1 = [-5,-4,-3,-1,1,3,4,5] #Cuts on values of ctw, ctwi, cbw, cbwi
 cuts2 = [-10,10] #Cuts on values of cptb and cptbi
-listOfProcesses = []
 
 for cptb in range(-10,11,5):
     if cptb in cuts2:
