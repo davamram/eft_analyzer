@@ -18,21 +18,47 @@
 #include <TSystem.h>
 using namespace std;
 
-bool reweight = false;
-
 bool normalization = true; //Turn on normalization to 1
 bool log_fity = true; //Turn on log scale in Y axis
 bool diff_xsection = false; //Change this to have histograms normalized to Xsection
 bool flows = false; //Change this to Active/Deactivate Overflow and Underflow for all Histograms
 
-TTree* FileReader(string inputPath)
+TTree* FileReader(string inputPath, string TreeName)
 {
   // Fct to read ROOT files
   TFile* RootFile = new TFile(inputPath.c_str(),"READ");
   TTree* Tree;
-  Tree = (TTree*) RootFile->Get("Tree");
+  Tree = (TTree*) RootFile->Get(TreeName.c_str());
   return Tree;
 } 
+
+float eftXsection(string eft)
+{
+  // Fcts to get the right cross section value for EFT analysis
+
+  float eftXsectionValue = 1.0;
+
+  ifstream XsectionsFile;
+  XsectionsFile.open("Xsections.csv");
+
+  string eftOperatorName;
+  string eftValue;
+
+  bool found_value = false;
+
+  while(getline(XsectionsFile,eftOperatorName,',') && !found_value)
+  {
+    getline(XsectionsFile,eftValue,'\n');
+
+    if(eft == eftOperatorName)
+    {
+      found_value = true;
+      eftXsectionValue = std::stof(eftValue);
+    }
+  }
+  return eftXsectionValue;
+
+}
 
 TH1D* GetHistoWeight(TTree* t, string variable, int nbins, double xmin, double xmax, string cut, string name)
 {
@@ -342,7 +368,7 @@ void Compare_1Histos(TTree* t1, string variable, int nbins, double xmin, double 
    Canvas->Print(Name.c_str());
 }
 
-void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string Name){
+void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string Name){
 
   TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
   TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
@@ -350,12 +376,24 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
   Histo_1->SetStats(kFALSE);
   Histo_2->SetStats(kFALSE);
 
+  float sigma1=1.0, sigma2=1.0;
+
+  if(Xsec1 != "")
+  {
+    sigma1 = eftXsection(Xsec1);
+  }
+
+  if(Xsec2 != "")
+  {
+    sigma2 = eftXsection(Xsec2);
+  }
+
   if(normalization)
   {
     double a = Histo_1->Integral();
     double b = Histo_2->Integral();
-    Histo_1->Scale(1/a);
-    Histo_2->Scale(1/b);
+    Histo_1->Scale(sigma1/a);
+    Histo_2->Scale(sigma2/b);
     Name += "_normalized";
     legendY += " normalized";
   }
@@ -363,7 +401,7 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
 
   TCanvas* Canvas = new TCanvas("Canvas","Canvas");
   Histo_1->SetTitle("");
-  Histo_1->SetAxisRange(0,max*1.33,"Y");
+  Histo_1->SetAxisRange(0,max*1.43,"Y");
 
   float lineWidth = 4.0;
 
@@ -414,7 +452,7 @@ void Compare_2Histos(TTree* t1, TTree* t2, string variable, int nbins, double xm
 
 }
 
-void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string selection3, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string legendEntry3, string EFT, string Name){
+void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string Xsec1, string Xsec2, string Xsec3, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string selection3, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string legendEntry3, string EFT, string Name){
   
   Name += variable;
   
@@ -429,22 +467,38 @@ void Compare_3Histos(TTree* t1, TTree* t2, TTree* t3, string variable, int nbins
   TCanvas* Canvas = new TCanvas("Canvas","Canvas");
   Histo_1->SetTitle("");
 
+  float sigma1=1.0, sigma2=1.0, sigma3=1.0;
+
+  if(Xsec1 != "")
+  {
+    sigma1 = eftXsection(Xsec1);
+  }
+
+  if(Xsec2 != "")
+  {
+    sigma2 = eftXsection(Xsec2);
+  }
+
+  if(Xsec3 != "")
+  {
+    sigma3 = eftXsection(Xsec3);
+  }
 
   if(normalization) 
   {
-    Double_t integral1 = 1/Histo_1->Integral();
+    Double_t integral1 = sigma1/Histo_1->Integral();
     Histo_1->Scale(integral1);
     
-    Double_t integral2 = 1/Histo_2->Integral();
+    Double_t integral2 = sigma2/Histo_2->Integral();
     Histo_2->Scale(integral2);
     
-    Double_t integral3 = 1/Histo_3->Integral();
+    Double_t integral3 = sigma3/Histo_3->Integral();
     Histo_3->Scale(integral3);
 
     Name += "_normalized";
     legendY += " normalized";
   }
-  if(log_fity) 
+  if(log_fity && legendX=="Mass_{top} [GeV]") 
   {
     Canvas->SetLogy();
     Name += "_log"; 
@@ -1027,104 +1081,154 @@ int main ()
 {
 
   // Root files pathways
-  string tarballInputPWDfiles = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/cookedFiles/STrecoSelection/lhapdf306000/LO/tarballFile/";
-  string stdMG5_500k_events_atLO = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/cookedFiles/STrecoSelection/lhapdf306000/LO/standaloneMG5/500k_events/";
-  string stdMG5_5M_events_atLO = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/cookedFiles/STrecoSelection/lhapdf306000/LO/standaloneMG5/5M_events/";
+
+  string lheLevelFiles = "/eos/lyoeos.in2p3.fr/home/greenberg/rootFiles/cookedFiles/Streco17/lhapdf306000/";
+  string NanoGENfiles = "/gridgroup/cms/greenberg/pheno/CMSSW_12_0_4/src/NanoGEN/NanoGEN_analysis/output/";
 
 
   // Root files definitions as TTree objects
-  TTree* rwgt_729 = FileReader(tarballInputPWDfiles + "output_t_channel_EFT_atLO_nomadspin_reweight_729_init2_5M.root");
-  TTree* rwgt_729_initial_sample = FileReader(tarballInputPWDfiles + "output_t_channel_EFT_atLO_nomadspin_reweight729.root");
-
-
-  TTree* std_SM = FileReader(stdMG5_500k_events_atLO + "output_t_channel_SM.root");
-
-  TTree* std_ctwi_m2 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_ctwi_m2.root");
-
-  TTree* std_cbwi_m2 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_cbwi_m2.root");
-  TTree* std_cbwi_p2 = FileReader(stdMG5_5M_events_atLO + "output_t_channel_cbwi_p2.root");
-
-
-  TTree* std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2.root");
-  TTree* std_cptbi_p5_ctw_p2_cbw_p2 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_cptbi_p5_ctw_p2_cbw_p2.root");
   
-  TTree* std_allDIM6_p2p5 = FileReader(stdMG5_500k_events_atLO + "output_t_channel_allDIM6_p2p5.root");
+  TTree* EFTreweight729 = FileReader(lheLevelFiles + "output_ST_t_channel_atLO_5Mevents_nomadspin_EFTreweight729_basline_allDim6_p2p5_dim6top.root", "Tree");
 
+  TTree* SM_stdMG5 = FileReader(lheLevelFiles + "output_ST_t_channel_atLO_500Kevents_SM_MG5_dim6top.root", "Tree");
+
+  TTree* ctwi_m2_stdMG5 = FileReader(lheLevelFiles + "output_ST_t_channel_atLO_500Kevents_ctwi_m2_MG5_dim6top.root", "Tree");
+
+  TTree* cbwi_m2_stdMG5 = FileReader(lheLevelFiles + "output_ST_t_channel_atLO_500Kevents_cbwi_m2_MG5_dim6top.root", "Tree");
+  TTree* cbwi_p2_stdMG5 = FileReader(lheLevelFiles + "output_ST_t_channel_atLO_5Mevents_cbwi_p2_MG5_dim6top.root", "Tree");
+
+
+  TTree* cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5 = FileReader(lheLevelFiles + "output_ST_t_channel_atLO_500Kevents_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_MG5_dim6top.root", "Tree");
+  TTree* cptbi_p5_ctw_p2_cbw_p2_stdMG5 = FileReader(lheLevelFiles + "output_ST_t_channel_atLO_500Kevents_cptbi_p5_ctw_p2_cbw_p2_MG5_dim6top.root", "Tree");
+
+  TTree* allDIM6_p2p5_stdMG5 = FileReader(lheLevelFiles + "output_ST_t_channel_atLO_500Kevents_allDIM6_p2p5_MG5_dim6top.root", "Tree");
+
+
+
+  // POWHEG vd MG5 comparaison files
+   TTree* SM_MG5 = FileReader(NanoGENfiles + "output_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_NanoGEN_GEN_KV.root", "Tree;4");
+   TTree* SM_POWHEG_top_antitop = FileReader(NanoGENfiles + "output_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree;1");
+   TTree* SM_POWHEG_top = FileReader(NanoGENfiles + "output_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree;20");
+   TTree* SM_POWHEG_antitop = FileReader(NanoGENfiles + "output_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree;11");
+
+   TTree* SM_MG5_RealSolutions = FileReader(NanoGENfiles + "output_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_NanoGEN_GEN_KV.root", "Tree_real;3");
+   TTree* SM_POWHEG_top_antitop_RealSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_real;1");
+   TTree* SM_POWHEG_top_RealSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_real;13");
+   TTree* SM_POWHEG_antitop_RealSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_real;7");
+
+   TTree* SM_MG5_ComplexSolutions = FileReader(NanoGENfiles + "output_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_NanoGEN_GEN_KV.root", "Tree_complex;1");
+   TTree* SM_POWHEG_top_antitop_ComplexSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_complex;1");
+   TTree* SM_POWHEG_top_ComplexSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_complex;3");
+   TTree* SM_POWHEG_antitop_ComplexSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_complex;2");
 
 
   // Outputs pathways definitins
   string output_c2h = "results/compare2Histos/";
   string output_c3h = "results/compare3Histos/";
   string output_c9h = "results/compare9Histos/";
+  string output_MG5_vs_POWHEG = "results/compare_MG5_POWHEG/";
+
+  // Compare MG5 and POWHEG
+  // Compare_2Histos(SM_MG5,SM_POWHEG_top_antitop,"","","PhiStar",25,0,2*M_PI,"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","MG5","POWHEG",output_MG5_vs_POWHEG+"PhiStar/SM");
+  // Compare_2Histos(SM_MG5_RealSolutions,SM_POWHEG_top_antitop_RealSolutions,"","","PhiStar_Real",25,0,2*M_PI,"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","Real Solutions","","MG5","POWHEG",output_MG5_vs_POWHEG+"PhiStar/SM_real");
+  // Compare_2Histos(SM_MG5_ComplexSolutions,SM_POWHEG_top_antitop_ComplexSolutions,"","","PhiStar_Complex",25,0,2*M_PI,"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","Complex Solutions","","MG5","POWHEG",output_MG5_vs_POWHEG+"PhiStar/SM_complex");
+  // Compare_2Histos(SM_POWHEG_top,SM_POWHEG_antitop,"","","PhiStar",25,0,2*M_PI,"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","POWHEG","","single top","single antitop",output_MG5_vs_POWHEG+"PhiStar/SM_complex_top_vs_antitop");
+
+
+  // Compare_2Histos(SM_MG5,SM_POWHEG_top_antitop,"","","cosThetaStar",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","MG5","POWHEG",output_MG5_vs_POWHEG+"cosThetaStar/SM");
+  // Compare_2Histos(SM_MG5_RealSolutions,SM_POWHEG_top_antitop_RealSolutions,"","","cosThetaStar_Real",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","Real Solutions","","MG5","POWHEG",output_MG5_vs_POWHEG+"cosThetaStar/SM_real");
+  // Compare_2Histos(SM_MG5_ComplexSolutions,SM_POWHEG_top_antitop_ComplexSolutions,"","","cosThetaStar_Complex",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","Complex Solutions","","MG5","POWHEG",output_MG5_vs_POWHEG+"cosThetaStar/SM_complex");
+  // Compare_2Histos(SM_POWHEG_top_ComplexSolutions,SM_POWHEG_antitop_ComplexSolutions,"","","cosThetaStar_Complex",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","Complex Solutions","POWHEG","single top","single antitop",output_MG5_vs_POWHEG+"cosThetaStar/SM_complex_top_vs_antitop");
 
 
 
   // Compare 2 Histos
     // PhiStar
-  // Compare_2Histos(rwgt_729,std_SM,"PhiStar",25,0,2*TMath::Pi(),"weight_SM","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"PhiStar/SM");
+  // Compare_2Histos(EFTreweight729,SM_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_SM","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"PhiStar/SM");
   
-  // Compare_2Histos(rwgt_729,std_ctwi_m2,"PhiStar",25,0,2*TMath::Pi(),"weight_ctwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"PhiStar/ctwi_m2");
+  // Compare_2Histos(EFTreweight729,ctwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_ctwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"PhiStar/ctwi_m2");
   
-  // Compare_2Histos(rwgt_729,std_cbwi_m2,"PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"PhiStar/cbwi_m2"); 
-  // Compare_2Histos(rwgt_729,std_cbwi_p2,"PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_p2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=2","Rwgt","Std",output_c2h+"PhiStar/cbwi_p2"); 
-  // Compare_2Histos(std_cbwi_p2,std_cbwi_m2,"PhiStar",25,0,2*TMath::Pi(),"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","Std","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"PhiStar/allStd_cbwi_m2_cbwi_p2");
-  Compare_2Histos(rwgt_729,rwgt_729,"PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_p2","weight_cbwi_m2","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","Rwgt","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"PhiStar/allRwgt_cbwi_m2_cbwi_p2");
+  // Compare_2Histos(EFTreweight729,cbwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"PhiStar/cbwi_m2"); 
+  // Compare_2Histos(EFTreweight729,cbwi_p2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_p2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=2","Rwgt","Std",output_c2h+"PhiStar/cbwi_p2"); 
+  // Compare_2Histos(cbwi_p2_stdMG5,cbwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","Std","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"PhiStar/allStd_cbwi_m2_cbwi_p2");
+  // Compare_2Histos(EFTreweight729,EFTreweight729, "cbwi_p2", "cbwi_m2","PhiStar",25,0,2*TMath::Pi(),"weight_cbwi_p2","weight_cbwi_m2","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","Rwgt","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"PhiStar/allRwgt_cbwi_m2_cbwi_p2");
+  // Compare_2Histos(EFTreweight729,EFTreweight729, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_ctwi_p2","weight_ctwi_m2","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","Rwgt","C_{tW}^{I}=2","C_{tW}^{I}=-2",output_c2h+"PhiStar/allRwgt_ctwi_m2_ctwi_p2");
 
 
   
-  // Compare_2Histos(rwgt_729,std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2,"PhiStar",25,0,2*TMath::Pi(),"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"PhiStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
-  // Compare_2Histos(rwgt_729,std_cptbi_p5_ctw_p2_cbw_p2,"PhiStar",25,0,2*TMath::Pi(),"weight_cptbi_p5_ctw_p2_cbw_p2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"PhiStar/std_cptbi_p5_ctw_p2_cbw_p2");
+  // Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"PhiStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(EFTreweight729,cptbi_p5_ctw_p2_cbw_p2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptbi_p5_ctw_p2_cbw_p2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"PhiStar/cptbi_p5_ctw_p2_cbw_p2_stdMG5");
 
 
     // cosThetaStar
-  // Compare_2Histos(rwgt_729,std_SM,"cosThetaStar",25,-1,1,"weight_SM","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"cosThetaStar/SM");
+  // Compare_2Histos(EFTreweight729,SM_stdMG5, "", "","cosThetaStar",25,-1,1,"weight_SM","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"cosThetaStar/SM");
   
-  // Compare_2Histos(rwgt_729,std_ctwi_m2,"cosThetaStar",25,-1,1,"weight_ctwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"cosThetaStar/ctwi_m2");
+  // Compare_2Histos(EFTreweight729,ctwi_m2_stdMG5, "", "","cosThetaStar",25,-1,1,"weight_ctwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"cosThetaStar/ctwi_m2");
   
-  // Compare_2Histos(rwgt_729,std_cbwi_m2,"cosThetaStar",25,-1,1,"weight_cbwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"cosThetaStar/cbwi_m2");
-  // Compare_2Histos(rwgt_729,std_cbwi_p2,"cosThetaStar",25,-1,1,"weight_cbwi_p2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=2","Rwgt","Std",output_c2h+"cosThetaStar/cbwi_p2");
-  // Compare_2Histos(std_cbwi_p2,std_cbwi_m2,"cosThetaStar",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","Std","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"cosThetaStar/allStd_cbwi_m2_cbwi_p2");
+  // Compare_2Histos(EFTreweight729,cbwi_m2_stdMG5, "", "","cosThetaStar",25,-1,1,"weight_cbwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"cosThetaStar/cbwi_m2");
+  // Compare_2Histos(EFTreweight729,cbwi_p2_stdMG5, "", "","cosThetaStar",25,-1,1,"weight_cbwi_p2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=2","Rwgt","Std",output_c2h+"cosThetaStar/cbwi_p2");
+  // Compare_2Histos(cbwi_p2_stdMG5,cbwi_m2_stdMG5, "", "","cosThetaStar",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","Std","C_{bW}^{I}=2","C_{bW}^{I}=-2",output_c2h+"cosThetaStar/allStd_cbwi_m2_cbwi_p2");
 
-  // Compare_2Histos(rwgt_729,std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2,"cosThetaStar",25,-1,1,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"cosThetaStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
-  // Compare_2Histos(rwgt_729,std_cptbi_p5_ctw_p2_cbw_p2,"cosThetaStar",25,-1,1,"weight_cptbi_p5_ctw_p2_cbw_p2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"cosThetaStar/std_cptbi_p5_ctw_p2_cbw_p2");
+  // Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","cosThetaStar",25,-1,1,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"cosThetaStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(EFTreweight729,cptbi_p5_ctw_p2_cbw_p2_stdMG5, "", "","cosThetaStar",25,-1,1,"weight_cptbi_p5_ctw_p2_cbw_p2","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"cosThetaStar/cptbi_p5_ctw_p2_cbw_p2_stdMG5");
 
 
     // cosTheta
-  // Compare_2Histos(rwgt_729,std_SM,"cosTheta",25,-1,1,"weight_SM","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"cosTheta/SM");
+  // Compare_2Histos(EFTreweight729,SM_stdMG5, "", "","cosTheta",25,-1,1,"weight_SM","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"cosTheta/SM");
   
-  // Compare_2Histos(rwgt_729,std_ctwi_m2,"cosTheta",25,-1,1,"weight_ctwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"cosTheta/ctwi_m2");
+  // Compare_2Histos(EFTreweight729,ctwi_m2_stdMG5, "", "","cosTheta",25,-1,1,"weight_ctwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"cosTheta/ctwi_m2");
   
-  // Compare_2Histos(rwgt_729,std_cbwi_m2,"cosTheta",25,-1,1,"weight_cbwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"cosTheta/cbwi_m2");
+  // Compare_2Histos(EFTreweight729,cbwi_m2_stdMG5, "", "","cosTheta",25,-1,1,"weight_cbwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"cosTheta/cbwi_m2");
   
-  // Compare_2Histos(rwgt_729,std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2,"cosTheta",25,-1,1,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"cosTheta/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
-  // Compare_2Histos(rwgt_729,std_cptbi_p5_ctw_p2_cbw_p2,"cosTheta",25,-1,1,"weight_cptbi_p5_ctw_p2_cbw_p2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"cosTheta/std_cptbi_p5_ctw_p2_cbw_p2");
+  // Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","cosTheta",25,-1,1,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"cosTheta/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(EFTreweight729,cptbi_p5_ctw_p2_cbw_p2_stdMG5, "", "","cosTheta",25,-1,1,"weight_cptbi_p5_ctw_p2_cbw_p2","1","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"cosTheta/cptbi_p5_ctw_p2_cbw_p2_stdMG5");
 
 
   // Top Mass
-  // Compare_2Histos(rwgt_729,std_SM,"top_mass",25,166,178,"weight_SM","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"top_mass/SM");
+  // Compare_2Histos(EFTreweight729,SM_stdMG5, "", "","top_mass",25,166,178,"weight_SM","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"top_mass/SM");
   
-  // Compare_2Histos(rwgt_729,std_ctwi_m2,"top_mass",25,166,178,"weight_ctwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"top_mass/ctwi_m2");
+  // Compare_2Histos(EFTreweight729,ctwi_m2_stdMG5, "", "","top_mass",25,166,178,"weight_ctwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"top_mass/ctwi_m2");
   
-  // Compare_2Histos(rwgt_729,std_cbwi_m2,"top_mass",25,166,178,"weight_cbwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"top_mass/cbwi_m2");
+  // Compare_2Histos(EFTreweight729,cbwi_m2_stdMG5, "", "","top_mass",25,166,178,"weight_cbwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","C_{bW}^{I}=-2","Rwgt","Std",output_c2h+"top_mass/cbwi_m2");
   
-  // Compare_2Histos(rwgt_729,std_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2,"top_mass",25,166,178,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"top_mass/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
-  // Compare_2Histos(rwgt_729,std_cptbi_p5_ctw_p2_cbw_p2,"top_mass",25,166,178,"weight_cptbi_p5_ctw_p2_cbw_p2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"top_mass/std_cptbi_p5_ctw_p2_cbw_p2");
+  // Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","top_mass",25,166,178,"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"top_mass/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(EFTreweight729,cptbi_p5_ctw_p2_cbw_p2_stdMG5, "", "","top_mass",25,166,178,"weight_cptbi_p5_ctw_p2_cbw_p2","1","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"top_mass/cptbi_p5_ctw_p2_cbw_p2_stdMG5");
 
 
   
   // Compare 3 Histos
     // PhiStar
-  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"PhiStar",25,0,2*TMath::Pi(),"weight_SM","weight_ctwi_m2","weight_ctwi_p2","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"PhiStar/SM_ctwi_m2_ctwi_p2");
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "SM", "ctwi_m2", "ctwi_p2","PhiStar",25,0,2*TMath::Pi(),"weight_SM","weight_ctwi_m2","weight_ctwi_p2","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"PhiStar/SM_ctwi_m2_ctwi_p2");
 
     // costhetaStar
-  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"cosThetaStar",25,-1,1,"weight_SM","weight_cbwi_m2","weight_cbwi_p2","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{bW}^{I} = -2","C_{bW}^{I} = 2","",output_c3h+"cosThetaStar/SM_cbwi_m2_cbwi_p2_");
-  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"cosThetaStar",25,-1,1,"weight_SM","weight_ctwi_m2","weight_ctwi_p2","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"cosThetaStar/SM_ctwi_m2_ctwi_p2_");
-  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"top_mass",25,100,400,"weight_SM","weight_ctwi_m2","weight_ctwi_p2","Mass_{Top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"top_mass/SM_ctwi_m2_ctwi_m2_");
-  // Compare_3Histos(rwgt_729,rwgt_729,rwgt_729,"top_mass",25,100,400,"weight_SM","weight_cbwi_m2","weight_cbwi_p2","Mass_{Top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{bW}^{I} = -2","C_{bW}^{I} = 2","",output_c3h+"top_mass/SM_cbwi_m2_cbwi_m2_");
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "SM", "cbwi_m2", "cbwi_p2","cosThetaStar",25,-1,1,"weight_SM","weight_cbwi_m2","weight_cbwi_p2","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{bW}^{I} = -2","C_{bW}^{I} = 2","",output_c3h+"cosThetaStar/SM_cbwi_m2_cbwi_p2_");
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "SM", "ctwi_m2", "ctwi_p2","cosThetaStar",25,-1,1,"weight_SM","weight_ctwi_m2","weight_ctwi_p2","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"cosThetaStar/SM_ctwi_m2_ctwi_p2_");
+
+    // top_mass
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "", "", "","top_mass",25,100,400,"weight_SM","weight_ctwi_m2","weight_ctwi_p2","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"top_mass/SM_ctwi_m2_ctwi_m2_");
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "", "", "","top_mass",25,100,400,"weight_SM","weight_cbwi_m2","weight_cbwi_p2","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{bW}^{I} = -2","C_{bW}^{I} = 2","",output_c3h+"top_mass/SM_cbwi_m2_cbwi_m2_");
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "", "", "","top_mass",25,100,400,"weight_SM","weight_ctwi_m2_cbwi_m2","weight_ctwi_p2_cbwi_p2","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I}=-2 ; C_{bW}^{I}=-2","C_{tW}^{I}=2 ; C_{bW}^{I}=2","",output_c3h+"top_mass/SM_vs_ctwi_m2_cbwi_m2_vs_ctwi_p2_cbwi_m2_");
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "", "", "","top_mass",25,100,400,"weight_SM","weight_cptbi_m5","weight_cptbi_p5","Mass_{top} [GeV]","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{ptb}^{I} = -5","C_{ptb}^{I} = 5","",output_c3h+"top_mass/SM_cptbi_m5_cptbi_p5_");
+
+    // cosTheta
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "SM", "ctwi_m2", "ctwi_p2","cosTheta",25,-1,1,"weight_SM","weight_cbwi_m2","weight_cbwi_p2","cos(#theta)","","legendUpLeft","Dim6 [TeV^{-2}]","","","","SM","C_{tW}^{I} = -2","C_{tW}^{I} = 2","",output_c3h+"cosTheta/SM_cbwi_m2_cbwi_p2_");
 
 
   // Compare 9 Histos
-  // Compare_9Histos(20,0,0.04,"weight_SM","weight_cptb_m5","weight_cptbi_m5","weight_ctw_m2","weight_ctwi_m2","weight_cbw_m2","weight_cbwi_m2","weight_cptbi_m5_ctw_p2","weight_cptb_p5_cbwi_m2",rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,rwgt_729,"weight_SM","weight_cptb_m5","weight_cptbi_m5","weight_ctw_m2","weight_ctwi_m2","weight_cbw_m2","weight_cbwi_m2","weight_cptbi_m5_ctw_p2","weight_cptb_p5_cbwi_m2","Weight","","legendUpRight","Dim6 EFT value [TeV^{-2}]",output_c9h+"weights/weights1");
+  // Compare_9Histos(20,0,0.04,"weight_SM","weight_cptb_m5","weight_cptbi_m5","weight_ctw_m2","weight_ctwi_m2","weight_cbw_m2","weight_cbwi_m2","weight_cptbi_m5_ctw_p2","weight_cptb_p5_cbwi_m2",EFTreweight729,EFTreweight729,EFTreweight729,EFTreweight729,EFTreweight729,EFTreweight729,EFTreweight729,EFTreweight729,EFTreweight729,"weight_SM","weight_cptb_m5","weight_cptbi_m5","weight_ctw_m2","weight_ctwi_m2","weight_cbw_m2","weight_cbwi_m2","weight_cptbi_m5_ctw_p2","weight_cptb_p5_cbwi_m2","Weight","","legendUpRight","Dim6 EFT value [TeV^{-2}]",output_c9h+"weights/weights1");
+
+
+
+
+
+
+
+
+
+  // Compare_3Histos(EFTreweight729,EFTreweight729,EFTreweight729, "SM", "cbwi_m2", "cbwi_p2","cosThetaStar",25,-1,1,"weight_SM","weight_cbwi_m2","weight_cbwi_p2","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","","","","SM","C_{bW}^{I} = -2","C_{bW}^{I} = 2","",output_c3h+"cosThetaStar/SM_cbwi_m2_cbwi_p2_");
+
+
 
   return 0;
+
 }
