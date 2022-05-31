@@ -16,6 +16,8 @@
 #include <TF1.h>
 #include <fstream>
 #include <TSystem.h>
+#include <TLatex.h>
+
 using namespace std;
 
 bool normalization = true; //Turn on normalization to 1
@@ -368,7 +370,7 @@ void Compare_1Histos(TTree* t1, string variable, int nbins, double xmin, double 
    Canvas->Print(Name.c_str());
 }
 
-void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string Name){
+void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string LatexText, string Name){
 
   TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
   TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
@@ -377,6 +379,8 @@ void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string va
   Histo_2->SetStats(kFALSE);
 
   float sigma1=1.0, sigma2=1.0;
+
+  TLatex* latex;
 
   if(Xsec1 != "")
   {
@@ -445,6 +449,13 @@ void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string va
 
   Name += ".png";
   Canvas->SetCanvasSize(2000,1500);
+
+  latex->SetTextSize(0.04);
+  latex->SetTextAlign(12);
+  // latex->DrawLatex(1, 1, LatexText.c_str());
+
+  // Canvas->SetGrid();
+
   Canvas->Print(Name.c_str());
 
   // cout << "Histo1 mean: "<<Histo_1->GetMean()<<endl;
@@ -1156,7 +1167,7 @@ int main ()
 
 
   
-  // Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {-5,-5}","{C_{tW},C_{tW}^{I}} = {-2,-2}","{C_{bW},C_{bW}^{I}} = {-2,-2}","Rwgt","Std",output_c2h+"PhiStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","","Weighted sample","Dedicated sample", "C_{c}",output_c2h+"PhiStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
   // Compare_2Histos(EFTreweight729,cptbi_p5_ctw_p2_cbw_p2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptbi_p5_ctw_p2_cbw_p2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"PhiStar/cptbi_p5_ctw_p2_cbw_p2_stdMG5");
 
 
