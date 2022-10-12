@@ -21,9 +21,9 @@
 using namespace std;
 
 bool normalization = true; //Turn on normalization to 1
-bool log_fity = true; //Turn on log scale in Y axis
+bool log_fity = false; //Turn on log scale in Y axis
 bool diff_xsection = false; //Change this to have histograms normalized to Xsection
-bool flows = false; //Change this to Active/Deactivate Overflow and Underflow for all Histograms
+bool flows = true; //Change this to Active/Deactivate Overflow and Underflow for all Histograms
 
 TTree* FileReader(string inputPath, string TreeName)
 {
@@ -94,7 +94,7 @@ TH1D* GetHistoWeight(TTree* t, string variable, int nbins, double xmin, double x
 			val = histo->GetBinContent(1);
       //cout<<"val= "<<val<<endl;
 			histo->SetBinContent(1, val+underflow);
-			 histo->SetBinContent(0, 0);
+			histo->SetBinContent(0, 0);
 		}
 		double overflow = histo->GetBinContent(nbins+1);
     //cout<<"overflow= "<<overflow<<endl;
@@ -370,7 +370,7 @@ void Compare_1Histos(TTree* t1, string variable, int nbins, double xmin, double 
    Canvas->Print(Name.c_str());
 }
 
-void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string l_cptb, string l_ctw, string l_cbw, string legendEntry1, string legendEntry2, string LatexText, string Name){
+void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string variable, int nbins, double xmin, double xmax, string selection1, string selection2, string legendX, string legendY, string legendPlace, string legendtitle, string legendEntry1, string legendEntry2, string LatexText, string Name){
 
   TH1D* Histo_1 = GetHistoWeight(t1, variable, nbins, xmin, xmax, selection1, "Histo_1");
   TH1D* Histo_2 = GetHistoWeight(t2, variable, nbins, xmin, xmax, selection2, "Histo_2");
@@ -378,9 +378,9 @@ void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string va
   Histo_1->SetStats(kFALSE);
   Histo_2->SetStats(kFALSE);
 
-  float sigma1=1.0, sigma2=1.0;
+  TCanvas* Canvas = new TCanvas("Canvas","Canvas");
 
-  TLatex* latex;
+  float sigma1=1.0, sigma2=1.0;
 
   if(Xsec1 != "")
   {
@@ -398,25 +398,34 @@ void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string va
     double b = Histo_2->Integral();
     Histo_1->Scale(sigma1/a);
     Histo_2->Scale(sigma2/b);
+    legendY += "";
     Name += "_normalized";
-    legendY += " normalized";
   }
+
+  if(log_fity && legendX=="mass_{top} [GeV]") 
+  {
+    Canvas->SetLogy();
+    Name += "_log"; 
+    legendY += " log";
+  }
+
   double max = (Histo_1->GetMaximum()>Histo_2->GetMaximum()) ? Histo_1->GetMaximum() : Histo_2->GetMaximum();
 
-  TCanvas* Canvas = new TCanvas("Canvas","Canvas");
   Histo_1->SetTitle("");
   Histo_1->SetAxisRange(0,max*1.43,"Y");
+
+
 
   float lineWidth = 4.0;
 
   Histo_1->SetXTitle(legendX.c_str());
   Histo_1->SetYTitle(legendY.c_str());
   Histo_1->SetLineColor(kRed);
-  Histo_1->SetLineWidth(lineWidth);
+  Histo_1->SetLineWidth(2);
   Histo_1->Draw();
 
   Histo_2->SetLineColor(kBlue);
-  Histo_2->SetLineWidth(lineWidth);
+  Histo_2->SetLineWidth(2);
   Histo_2->Draw("SAME");
 
  double lx0, ly0, lx1, ly1;
@@ -436,10 +445,6 @@ void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string va
   TLegend* legend = new TLegend(lx0, ly0, lx1, ly1, legendtitle.c_str());
   legend->SetFillColor(kWhite);
 
-  if(l_cptb != "") legend->AddEntry((TObject*)0, l_cptb.c_str(), "");
-  if(l_ctw != "") legend->AddEntry((TObject*)0, l_ctw.c_str(), "");
-  if(l_cbw != "") legend->AddEntry((TObject*)0, l_cbw.c_str(), "");
-
   legend->AddEntry(Histo_1->GetName(), legendEntry1.c_str(), "l");
   legend->AddEntry(Histo_2->GetName(), legendEntry2.c_str(), "l");
   legend->Draw("SAME");
@@ -447,15 +452,19 @@ void Compare_2Histos(TTree* t1, TTree* t2, string Xsec1, string Xsec2, string va
   legend->SetTextSize(0.035);
 
 
-  Name += ".png";
-  Canvas->SetCanvasSize(2000,1500);
 
-  latex->SetTextSize(0.04);
-  latex->SetTextAlign(12);
-  // latex->DrawLatex(1, 1, LatexText.c_str());
+  Canvas->SetCanvasSize(1500,1000);
+
+
 
   // Canvas->SetGrid();
 
+  // TLatex latex;
+  // latex.SetTextSize(0.4);
+  // latex.SetTextAlign(13);
+  // latex.DrawLatex(0.5, 0.5, LatexText.c_str());
+
+  Name += ".png";
   Canvas->Print(Name.c_str());
 
   // cout << "Histo1 mean: "<<Histo_1->GetMean()<<endl;
@@ -1117,20 +1126,20 @@ int main ()
 
 
   // POWHEG vd MG5 comparaison files
-   TTree* SM_MG5 = FileReader(NanoGENfiles + "output_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_NanoGEN_GEN_KV.root", "Tree;4");
-   TTree* SM_POWHEG_top_antitop = FileReader(NanoGENfiles + "output_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree;1");
-   TTree* SM_POWHEG_top = FileReader(NanoGENfiles + "output_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree;20");
-   TTree* SM_POWHEG_antitop = FileReader(NanoGENfiles + "output_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree;11");
+   TTree* SM_MG5 = FileReader(NanoGENfiles + "output_KV_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_MG5_NanoGEN.root", "Tree");
+   TTree* SM_POWHEG_top_antitop = FileReader(NanoGENfiles + "output_KV_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree");
+   TTree* SM_POWHEG_top = FileReader(NanoGENfiles + "output_KV_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree");
+   TTree* SM_POWHEG_antitop = FileReader(NanoGENfiles + "output_KV_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree");
 
-   TTree* SM_MG5_RealSolutions = FileReader(NanoGENfiles + "output_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_NanoGEN_GEN_KV.root", "Tree_real;3");
-   TTree* SM_POWHEG_top_antitop_RealSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_real;1");
-   TTree* SM_POWHEG_top_RealSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_real;13");
-   TTree* SM_POWHEG_antitop_RealSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_real;7");
+   TTree* SM_MG5_RealSolutions = FileReader(NanoGENfiles + "output_KV_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_MG5_NanoGEN.root", "Tree_real");
+   TTree* SM_POWHEG_top_antitop_RealSolutions = FileReader(NanoGENfiles + "output_KV_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree_real");
+   TTree* SM_POWHEG_top_RealSolutions = FileReader(NanoGENfiles + "output_KV_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree_real");
+   TTree* SM_POWHEG_antitop_RealSolutions = FileReader(NanoGENfiles + "output_KV_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree_real");
 
-   TTree* SM_MG5_ComplexSolutions = FileReader(NanoGENfiles + "output_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_NanoGEN_GEN_KV.root", "Tree_complex;1");
-   TTree* SM_POWHEG_top_antitop_ComplexSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_complex;1");
-   TTree* SM_POWHEG_top_ComplexSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_complex;3");
-   TTree* SM_POWHEG_antitop_ComplexSolutions = FileReader(NanoGENfiles + "output_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_GEN_KV.root", "Tree_complex;2");
+   TTree* SM_MG5_ComplexSolutions = FileReader(NanoGENfiles + "output_KV_PROC_t_channel_SM_atLO_13TeV_LHE_0to499_MG5_NanoGEN.root", "Tree_complex");
+   TTree* SM_POWHEG_top_antitop_ComplexSolutions = FileReader(NanoGENfiles + "output_KV_ST_t-channel_top_and_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree_complex");
+   TTree* SM_POWHEG_top_ComplexSolutions = FileReader(NanoGENfiles + "output_KV_ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree_complex");
+   TTree* SM_POWHEG_antitop_ComplexSolutions = FileReader(NanoGENfiles + "output_KV_ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_NanoGEN.root", "Tree_complex");
 
 
   // Outputs pathways definitins
@@ -1140,22 +1149,57 @@ int main ()
   string output_MG5_vs_POWHEG = "results/compare_MG5_POWHEG/";
 
   // Compare MG5 and POWHEG
-  // Compare_2Histos(SM_MG5,SM_POWHEG_top_antitop,"","","PhiStar",25,0,2*M_PI,"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","MG5","POWHEG",output_MG5_vs_POWHEG+"PhiStar/SM");
-  // Compare_2Histos(SM_MG5_RealSolutions,SM_POWHEG_top_antitop_RealSolutions,"","","PhiStar_Real",25,0,2*M_PI,"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","Real Solutions","","MG5","POWHEG",output_MG5_vs_POWHEG+"PhiStar/SM_real");
-  // Compare_2Histos(SM_MG5_ComplexSolutions,SM_POWHEG_top_antitop_ComplexSolutions,"","","PhiStar_Complex",25,0,2*M_PI,"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","Complex Solutions","","MG5","POWHEG",output_MG5_vs_POWHEG+"PhiStar/SM_complex");
-  // Compare_2Histos(SM_POWHEG_top,SM_POWHEG_antitop,"","","PhiStar",25,0,2*M_PI,"1","1","#phi* [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","POWHEG","","single top","single antitop",output_MG5_vs_POWHEG+"PhiStar/SM_complex_top_vs_antitop");
+   
+    // KV Variables
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "PhiStar", 30, 0.0, 2*M_PI, "1", "1", "#phi* [rad]", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"KV/PhiStar_");
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "cosThetaStar", 30, -1, 1, "1", "1", "cos(#theta*)", "", "legendUpRight", "SM", "MG5", "POWHEG", "",output_MG5_vs_POWHEG+"KV/cosThetaStar_");
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "cosTheta", 30, -1, 1, "1", "1", "cos(#theta)", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"KV/cosTheta_");
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "sinThetaStar", 30, 0, 1, "1", "1", "sin(#theta*)", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"KV/sinThetaStar_");
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "cosPhiStar", 30, 0, 1, "1", "1", "cos(#phi*)", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"KV/cosPhiStar");
+
+  // Lepton
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "lepton_pt", 30, 0, 150, "1", "1", "pT_{lep} [GeV]", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"lepton/lepton_pt_");
+
+  // Neutrino
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "neutrino_pt", 30, 0, 150, "1", "1", "pT_{#nu} [GeV]", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"neutrino/neutrino_pt_");
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "neutrino_phi", 30, -4, 4, "1", "1", "#phi_{#nu} [GeV]", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"neutrino/neutrino_phi_");
 
 
-  // Compare_2Histos(SM_MG5,SM_POWHEG_top_antitop,"","","cosThetaStar",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","MG5","POWHEG",output_MG5_vs_POWHEG+"cosThetaStar/SM");
-  // Compare_2Histos(SM_MG5_RealSolutions,SM_POWHEG_top_antitop_RealSolutions,"","","cosThetaStar_Real",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","Real Solutions","","MG5","POWHEG",output_MG5_vs_POWHEG+"cosThetaStar/SM_real");
-  // Compare_2Histos(SM_MG5_ComplexSolutions,SM_POWHEG_top_antitop_ComplexSolutions,"","","cosThetaStar_Complex",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","Complex Solutions","","MG5","POWHEG",output_MG5_vs_POWHEG+"cosThetaStar/SM_complex");
-  // Compare_2Histos(SM_POWHEG_top_ComplexSolutions,SM_POWHEG_antitop_ComplexSolutions,"","","cosThetaStar_Complex",25,-1,1,"1","1","cos(#theta*)","","legendUpRight","Dim6 [TeV^{-2}]","SM","Complex Solutions","POWHEG","single top","single antitop",output_MG5_vs_POWHEG+"cosThetaStar/SM_complex_top_vs_antitop");
+  // JetSpec
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "specJet_pt", 30, 0, 350, "1", "1", "pT_{q'} [GeV]", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"specJet/specJet_pt_");
+
+  // bJet
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "bJet_pt", 30, 0, 350, "1", "1", "pT_{b} [GeV]", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"bJet/bJet_pt_");
+
+
+  // Top
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "top_pt", 30, 0, 400, "1", "1", "pT_{top} [GeV]", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"top/top_pt_");
+  // Compare_2Histos(SM_MG5, SM_POWHEG_top_antitop, "","" , "top_mass", 30, 100, 250, "1", "1", "mass_{top} [GeV]", "", "legendUpRight", "SM", "MG5", "POWHEG", "", output_MG5_vs_POWHEG+"top/top_mass_");
+
+
+    // Validating Rwgt sample
+
+  Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","#phi * [rad]","normalized","legendUpRight","Dim6 [TeV^{-2}]","Weighted sample","Dedicated sample","","results/ValidatingRwgt/KV/PhiStar_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  Compare_2Histos(EFTreweight729,cptbi_p5_ctw_p2_cbw_p2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptbi_p5_ctw_p2_cbw_p2","1","#phi * [rad]","normalized","legendUpRight","Dim6 [TeV^{-2}]","Weighted sample","Dedicated sample","","results/ValidatingRwgt/KV/PhiStar_cptbi_p5_ctw_p2_cbw_p2");
+
+  Compare_2Histos(EFTreweight729,cptbi_p5_ctw_p2_cbw_p2_stdMG5, "", "","cosThetaStar",25,-1,1,"weight_cptbi_p5_ctw_p2_cbw_p2","1","cos(#theta*)","normalized","legendUpRight","Dim6 [TeV^{-2}]","Weighted sample","Dedicated sample","","results/ValidatingRwgt/KV/cosThetaStar_cptbi_p5_ctw_p2_cbw_p2");
+
+  Compare_2Histos(EFTreweight729,SM_stdMG5, "", "","cosTheta",25,-1,1,"weight_SM","1","cos(#theta)","normalized","legendUpRight","SM","Weighted sample","Dedicated sample","","results/ValidatingRwgt/KV/cosTheta_SM");
+
+  Compare_2Histos(EFTreweight729,cbwi_m2_stdMG5, "", "","top_pt",25,0,400,"weight_cbwi_m2","1","pT_{top} [GeV]","normalized","legendUpRight","Dim6 [TeV^{-2}]","Weighted sample","Dedicated sample","","results/ValidatingRwgt/top/top_pt_cbwi_m2");
+
+
+
+
+
+
+
 
 
 
   // Compare 2 Histos
     // PhiStar
-  // Compare_2Histos(EFTreweight729,SM_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_SM","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","SM","","","Rwgt","Std",output_c2h+"PhiStar/SM");
+  // Compare_2Histos(EFTreweight729,SM_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_SM","1","#phi * [rad]","1/#sum weights","legendUpRight","SM","Weighted sample","Dedicated sample","",output_c2h+"PhiStar/SM");
   
   // Compare_2Histos(EFTreweight729,ctwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_ctwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","C_{tW}^{I}=-2","","Rwgt","Std",output_c2h+"PhiStar/ctwi_m2");
   
@@ -1167,7 +1211,7 @@ int main ()
 
 
   
-  Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","","","","Weighted sample","Dedicated sample", "C_{c}",output_c2h+"PhiStar/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
+  // Compare_2Histos(EFTreweight729,cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2","1","#phi * [rad]","1/#sum weights","legendUpRight","Dim6 [TeV^{-2}]","Weighted sample","Dedicated sample","","results/ValidatingRwgt/cptb_m5_cptbi_m5_ctw_m2_ctwi_m2_cbw_m2_cbwi_m2");
   // Compare_2Histos(EFTreweight729,cptbi_p5_ctw_p2_cbw_p2_stdMG5, "", "","PhiStar",25,0,2*TMath::Pi(),"weight_cptbi_p5_ctw_p2_cbw_p2","1","#phi * [rad]","","legendUpRight","Dim6 [TeV^{-2}]","{C_{ptb},C_{ptb}^{I}} = {0,-5}","{C_{tW},C_{tW}^{I}} = {2,0}","{C_{bW},C_{bW}^{I}} = {2,0}","Rwgt","Std",output_c2h+"PhiStar/cptbi_p5_ctw_p2_cbw_p2_stdMG5");
 
 
