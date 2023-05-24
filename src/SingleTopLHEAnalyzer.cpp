@@ -19,7 +19,7 @@ using namespace std;
 
 void SingleTopLHEAnalyzer::Loop()
 {
-//   In a ROOT session, you can do:
+//   In a ROOT session, you can do
 //      Root > .L SingleTopLHEAnalyzer.C
 //      Root > SingleTopLHEAnalyzer t
 //      Root > t.GetEntry(12); // Fill t data members with entry number 12
