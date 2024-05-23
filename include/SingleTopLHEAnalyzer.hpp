@@ -22,7 +22,7 @@
 // Fixed size dimensions of array or collections stored in the TTree if any.
    const Int_t kMaxEvent = 1;
    const Int_t kMaxRwgt = 2000;
-   const Int_t kMaxParticle = 8;
+   const Int_t kMaxParticle = 15;
 
 class SingleTopLHEAnalyzer {
 public :
